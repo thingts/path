@@ -7,9 +7,9 @@
   "excludeNotDocumentedKinds": ["Class", "Module"],
   "excludePrivate": true,
   "includeHierarchySummary": false,
-  "name": "@thingts/filepath",
+  "name": "@thingts/path",
   "navigationLinks": {
-    "github.com/thingts/filepath": "https://github.com/thingts/filepath"
+    "github.com/thingts/path": "https://github.com/thingts/path"
   },
   "out": "docs",
   "readme": "typedoc/readme.md",

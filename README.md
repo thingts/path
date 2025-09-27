@@ -1,9 +1,9 @@
-# @thingts/filepath
+# @thingts/path
 
-[![npm version](https://img.shields.io/npm/v/@thingts/filepath.svg)](https://www.npmjs.com/package/@thingts/filepath)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/filepath/ci.yaml)](https://github.com/thingts/filepath/actions/workflows/ci.yaml)
-[![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/filepath/)
-[![GitHub License](https://img.shields.io/github/license/thingts/filepath)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/@thingts/path.svg)](https://www.npmjs.com/package/@thingts/path)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/path/ci.yaml)](https://github.com/thingts/path/actions/workflows/ci.yaml)
+[![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/path/)
+[![GitHub License](https://img.shields.io/github/license/thingts/path)](LICENSE)
 
 
 Type-safe, ergonomic package for working with paths, in any javascript environment (node.js, deno, browser, etc)
@@ -11,7 +11,7 @@ Type-safe, ergonomic package for working with paths, in any javascript environme
 
 
 Instead of juggling raw strings with
-[node:path](https://nodejs.org/api/path.html), `@thingts/filepath` provides
+[node:path](https://nodejs.org/api/path.html), `@thingts/path` provides
 TypeScript classes that make paths **first-class citizens** in your code.
 
 * Pure typescript, no dependencies on node.js
@@ -30,6 +30,18 @@ Together these features give you a safer, more expressive way to work with file,
 💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://www.npmjs.com/package/@thingts/fs-path) which builds on this package.
 
 
+## Installation
+
+```bash
+# with npm
+npm install @thingsts/path
+
+# with yarn
+yarn add @thingsts/path
+
+# with pnpm
+pnpm add @thingsts/path
+```
 
 ## Overview
 
@@ -64,10 +76,10 @@ object.
 
 This is a quick overview of some common operations, using AbsolutePath.
 
-For complete docs, see the [API Reference](https://thingts.github.io/filepath).
+For complete docs, see the [API Reference](https://thingts.github.io/path).
 
 ```typescript
-import { AbsolutePath } from '@thingts/filepath'
+import { AbsolutePath } from '@thingts/path'
 ``` 
 
 #### Normalize & resolve on construction

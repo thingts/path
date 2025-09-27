@@ -1,21 +1,20 @@
 {
-  "name": "@thingts/filepath",
+  "name": "@thingts/path",
   "version": "1.0.1",
   "description": "Type-safe, ergonomic package for working with paths in any javascript environment",
   "keywords": [
     "filename",
-    "filepath",
     "node:path",
     "path",
     "typescript"
   ],
-  "homepage": "https://github.com/thingts/filepath#readme",
+  "homepage": "https://github.com/thingts/path#readme",
   "bugs": {
-    "url": "https://github.com/thingts/filepath/issues"
+    "url": "https://github.com/thingts/path/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thingts/filepath.git"
+    "url": "git+https://github.com/thingts/path.git"
   },
   "license": "MIT",
   "author": "ronen barzel",
