@@ -8,6 +8,9 @@
   "excludePrivate": true,
   "includeHierarchySummary": false,
   "name": "@thingts/filepath",
+  "navigationLinks": {
+    "github.com/thingts/filepath": "https://github.com/thingts/filepath"
+  },
   "out": "docs",
   "readme": "none",
   "tsconfig": "tsconfig.json"

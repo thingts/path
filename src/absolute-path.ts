@@ -10,10 +10,9 @@ import { PathBase } from './path-base'
  *
  * {@link AbsolutePath} instances are normalized and immutable.
  *
- * {@link AbsolutePath} has the same functionality as {@link RelativePath} but
- * with added methods that are only valid for absolute paths: {@link
- * AbsolutePath.resolve, @link AbsolutePath.relativeTo}, and {@link
- * AbsolutePath.descendsFrom}.
+ * {@link AbsolutePath} has the same functionality as {@link RelativePath}
+ * but with added methods that are only valid for absolute paths: {@link
+ * resolve}, {@link relativeTo}, and {@link descendsFrom}.
  *
  * Note that {@link AbsolutePath} provides pure path manipulation, it does not access
  * the filesystem in any way.  (If you want to work with filesystem , use the
