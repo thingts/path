@@ -1,7 +1,7 @@
 # @thingts/filepath
 
 [![npm version](https://img.shields.io/npm/v/@thingts/filepath.svg)](https://www.npmjs.com/package/@thingts/filepath)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/filepath/ci.yml)](https://github.com/thingts/filepath/actions/workflows/ci.yml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/filepath/ci.yaml)](https://github.com/thingts/filepath/actions/workflows/ci.yaml)
 [![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/filepath/)
 [![GitHub License](https://img.shields.io/github/license/thingts/filepath)](LICENSE)
 
