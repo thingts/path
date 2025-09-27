@@ -14,18 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install
-      - run: pnpm build
-      - run: pnpm docs
+          node-version: 22   # or 20 if you prefer the older LTS
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run docs    # should output HTML into ./docs
+
+      - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
