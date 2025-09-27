@@ -12,6 +12,6 @@
     "github.com/thingts/filepath": "https://github.com/thingts/filepath"
   },
   "out": "docs",
-  "readme": "none",
+  "readme": "typedoc/readme.md",
   "tsconfig": "tsconfig.json"
 }
