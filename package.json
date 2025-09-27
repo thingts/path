@@ -1,6 +1,6 @@
 {
   "name": "@thingts/filepath",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Type-safe, ergonomic package for working with paths in any javascript environment",
   "keywords": [
     "filename",
