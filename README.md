@@ -1,11 +1,13 @@
 # @thingts/filepath
 
+[![npm version](https://img.shields.io/npm/v/@thingts/filepath.svg)](https://www.npmjs.com/package/@thingts/filepath)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/filepath/ci.yml)](https://github.com/thingts/filepath/actions/workflows/ci.yml)
+[![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/filepath/)
+[![GitHub License](https://img.shields.io/github/license/thingts/filepath)](LICENSE)
+
+
 Type-safe, ergonomic package for working with paths, in any javascript environment (node.js, deno, browser, etc)
 
-[![npm version](https://img.shields.io/npm/v/@thingts/filepath.svg)](https://www.npmjs.com/package/@thingts/filepath)
-[![CI](https://github.com/thingts/filepath/actions/workflows/ci.yml/badge.svg)](https://github.com/thingts/filepath/actions/workflows/ci.yml)
-[![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/filepath/)
-[![license](https://img.shields.io/npm/l/@thingts/filepath.svg)](LICENSE)
 
 
 Instead of juggling raw strings with
