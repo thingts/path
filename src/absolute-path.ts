@@ -14,10 +14,11 @@ import { PathBase } from './path-base'
  * but with added methods that are only valid for absolute paths: {@link
  * resolve}, {@link relativeTo}, and {@link descendsFrom}.
  *
- * Note that {@link AbsolutePath} provides pure path manipulation, it does not access
- * the filesystem in any way.  (If you want to work with filesystem , use the
- * `@thingts/fs-path` library which extends {@link AbsolutePath} with filestem
- * operations.)
+ * Note that {@link AbsolutePath} provides pure path manipulation, it does
+ * not access the filesystem in any way.  (If you want to work with the
+ * filesystem, you can use the
+ * [`@thingts/fs-path`](npm.com/package/@thingts/fs-path) library which
+ * extends {@link AbsolutePath} with filestem operations.)
  *
  * @example
  * ```ts
