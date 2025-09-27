@@ -2,6 +2,12 @@
 
 Type-safe, ergonomic package for working with paths, in any javascript environment (node.js, deno, browser, etc)
 
+[![npm version](https://img.shields.io/npm/v/@thingts/filepath.svg)](https://www.npmjs.com/package/@thingts/filepath)
+[![CI](https://github.com/thingts/filepath/actions/workflows/ci.yml/badge.svg)](https://github.com/thingts/filepath/actions/workflows/ci.yml)
+[![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/filepath/)
+[![license](https://img.shields.io/npm/l/@thingts/filepath.svg)](LICENSE)
+
+
 Instead of juggling raw strings with
 [node:path](https://nodejs.org/api/path.html), `@thingts/filepath` provides
 TypeScript classes that make paths **first-class citizens** in your code.
@@ -20,6 +26,8 @@ Together these features give you a safer, more expressive way to work with file,
 ⚠️ Currently only POSIX-style paths are supported (e.g. `/foo/bar`).
 
 💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://www.npmjs.com/package/@thingts/fs-path) which builds on this package.
+
+
 
 ## Overview
 
