@@ -1,18 +1,20 @@
 # @thingts/path
 
 [![npm version](https://img.shields.io/npm/v/@thingts/path.svg)](https://www.npmjs.com/package/@thingts/path)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/path/ci.yaml)](https://github.com/thingts/path/actions/workflows/ci.yaml)
 [![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/path/)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/path/ci.yaml)](https://github.com/thingts/path/actions/workflows/ci.yaml)
 [![GitHub License](https://img.shields.io/github/license/thingts/path)](LICENSE)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@thingts/path)](https://bundlephobia.com/package/@thingts/path)
 
 
-Type-safe, ergonomic package for working with paths, in any JavaScript environment (Node.js, Deno, browser, etc)
+Type-safe, ergonomic package for working with paths, in any JavaScript environment (Node.js, Deno, browser, etc.)
 
 ## Why?
 
 Instead of juggling raw strings with
 [node:path](https://nodejs.org/api/path.html), this package makes
-paths **first-class citizens** in your code.
+paths **first-class citizens** in your code -- with type-safe manipulation,
+independent of any particular runtime environment.
 
 ## Features
 
@@ -114,6 +116,11 @@ base.resolve('demo1', 'src/index.ts')         // AbsolutePath: '/project/demos/d
 base.resolve('/shared-demos', 'src/index.ts') // AbsolutePath: '/shared-demos/src/index.ts'
 
 ```
+
+## Related
+
+* [@thingts/fs-path](https://github.com/thingts/fs-path) – Adds filesystem access on top of **@thingts/path**, for Node.js environments.
+
 
 ## Contributing
 
