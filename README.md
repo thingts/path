@@ -6,13 +6,15 @@
 [![GitHub License](https://img.shields.io/github/license/thingts/path)](LICENSE)
 
 
-Type-safe, ergonomic package for working with paths, in any javascript environment (node.js, deno, browser, etc)
+Type-safe, ergonomic package for working with paths, in any JavaScript environment (Node.js, Deno, browser, etc)
 
-
+## Why?
 
 Instead of juggling raw strings with
-[node:path](https://nodejs.org/api/path.html), `@thingts/path` provides
-TypeScript classes that make paths **first-class citizens** in your code.
+[node:path](https://nodejs.org/api/path.html), this package makes
+paths **first-class citizens** in your code.
+
+## Features
 
 * Pure typescript, no dependencies on node.js
 * Immutable, chainable path objects with type-safe operations
@@ -23,29 +25,14 @@ TypeScript classes that make paths **first-class citizens** in your code.
 
 Together these features give you a safer, more expressive way to work with file, directory, and URL.pathname paths.
 
-#### Notes:
+> ⚠️ Currently only POSIX-style paths are supported (e.g. `/foo/bar`).
 
-⚠️ Currently only POSIX-style paths are supported (e.g. `/foo/bar`).
+> 💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://www.npmjs.com/package/@thingts/fs-path) which builds on this package.
 
-💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://www.npmjs.com/package/@thingts/fs-path) which builds on this package.
-
-
-## Installation
-
-```bash
-# with npm
-npm install @thingsts/path
-
-# with yarn
-yarn add @thingsts/path
-
-# with pnpm
-pnpm add @thingsts/path
-```
 
 ## Overview
 
-The package provides a set of classes to represent and manipulate
+**@thingts/path** provides a set of classes to represent and manipulate
 filesystem paths.  All classes are immutable; any path or filename
 manipulation operation returns a new instance.
 
@@ -70,6 +57,12 @@ object.
 * `AbsolutePath` has methods that only make sense for absolute paths:
   `path.descendsFrom(other)`, `path.relativeTo(other)`,
   `path.resolve(parts...)`
+
+## Installation
+
+```bash
+npm install @thingts/path
+```
 
 
 ## Usage examples
@@ -116,7 +109,7 @@ base.descendsFrom('/projects')    // true
 
 const rel = file.relativeTo(base) // RelativePath: 'demo1/src/index.ts'
 
-// Resolve against an absolute base: like .join() but can be overriden by absolute paths:
+// Resolve against an absolute base: like .join() but can be overridden by absolute paths:
 base.resolve('demo1', 'src/index.ts')         // AbsolutePath: '/project/demos/demo1/src/index.ts'
 base.resolve('/shared-demos', 'src/index.ts') // AbsolutePath: '/shared-demos/src/index.ts'
 
