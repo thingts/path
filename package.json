@@ -1,6 +1,6 @@
 {
   "name": "@thingts/path",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Type-safe, ergonomic package for working with paths in any javascript environment",
   "keywords": [
     "browser",
