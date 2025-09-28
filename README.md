@@ -27,7 +27,7 @@ Together these features give you a safer, more expressive way to work with file,
 
 > ⚠️ Currently only POSIX-style paths are supported (e.g. `/foo/bar`).
 
-> 💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://www.npmjs.com/package/@thingts/fs-path) which builds on this package.
+> 💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://github.com/thingts/fs-path) which builds on this package.
 
 
 ## Overview
