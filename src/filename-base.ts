@@ -3,11 +3,10 @@ import * as path from './path-tools'
 export abstract class FilenameBase {
   /** @private */
 
-  /** Implemented by subclasses to hold the normalized path string. */
+  /** @hidden Implemented by subclasses to hold the normalized path string. */
   protected abstract filename_: string
 
-
-  /** Implemented by subclasses to create a new instance with the given filename. */
+  /** @hidden Implemented by subclasses to create a new instance with the given filename. */
   protected abstract withFilename(filename: string): this
 
   /** Returns the filename as a string. */

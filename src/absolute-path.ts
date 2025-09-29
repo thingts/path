@@ -10,14 +10,14 @@ import { PathBase } from './path-base'
  *
  * {@link AbsolutePath} instances are normalized and immutable.
  *
- * {@link AbsolutePath} has the same functionality as {@link RelativePath}
- * but with added methods that are only valid for absolute paths: {@link
+ * {@link AbsolutePath} has the same functionality as {@link RelativePath} but
+ * with additional methods that are only valid for absolute paths: {@link
  * resolve}, {@link relativeTo}, and {@link descendsFrom}.
  *
  * Note that {@link AbsolutePath} provides pure path manipulation, it does
  * not access the filesystem in any way.  (If you want to work with the
  * filesystem, you can use the
- * [`@thingts/fs-path`](npm.com/package/@thingts/fs-path) library which
+ * [`@thingts/fs-path`](https://npm.com/package/@thingts/fs-path) library which
  * extends {@link AbsolutePath} with filestem operations.)
  *
  * @example

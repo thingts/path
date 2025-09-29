@@ -7,11 +7,18 @@
   "excludeNotDocumentedKinds": ["Class", "Module"],
   "excludePrivate": true,
   "includeHierarchySummary": false,
+  "includeVersion": true,
   "name": "@thingts/path",
   "navigationLinks": {
     "github.com/thingts/path": "https://github.com/thingts/path"
   },
   "out": "docs",
+  "plugin": ["typedoc-github-theme"],
   "readme": "typedoc/readme.md",
-  "tsconfig": "tsconfig.json"
+  "theme": "typedoc-github-theme",
+  "tsconfig": "tsconfig.json",
+  "visibilityFilters": {
+    "protected": false,
+    "inherited": true
+  }
 }

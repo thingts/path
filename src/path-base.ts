@@ -3,9 +3,8 @@ import { FilenameBase } from './filename-base'
 import { Filename } from './filename'
 
 export abstract class PathBase extends FilenameBase {
-  /** @private */
 
-  /** Implemented by subclasses to hold the normalized path string. */
+  /** @hidden Implemented by subclasses to hold the normalized path string. */
   protected abstract path_: string
 
   /**
