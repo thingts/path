@@ -82,7 +82,7 @@ export class AbsolutePath extends PathBase {
    * ```
    */
   resolve(...segments: readonly (string | Filename | RelativePath | AbsolutePath | null | undefined)[]): this {
-    return this.create(path.resolve(this.path_, ...segments.filter(s => s != null).map(s => String(s))))
+    return this.newSelf(path.resolve(this.path_, ...segments.filter(s => s != null).map(s => String(s))))
   }
 
   /////////////////////////////////////////////////////////////////////////////
