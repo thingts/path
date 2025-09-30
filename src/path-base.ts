@@ -133,7 +133,7 @@ export abstract class PathBase extends FilenameBase {
    * @returns A new path with the transformed filename.
    * @example
    * ```ts
-   * p.transformFilename(f => f.replaceStem(f.stem + '.bak'))
+   * p.transformFilename(f => String(f).toUpperCase())
    * ```
    */
   transformFilename(fn: (filename: Filename) => string | Filename): this {

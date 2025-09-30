@@ -96,7 +96,7 @@ a.parent                  // AbsolutePath: '/bar'
 const b = a.replaceStem('report')         // AbsolutePath: '/bar/report.txt'
 const c = b.replaceExtension('.md')       // AbsolutePath: '/bar/report.md'
 const d = c.replaceParent('/other')        // AbsolutePath: '/other/report.md'
-const e = d.transformFilename(fn => fn.toUpperCase()) // AbsolutePath: '/other/REPORT.MD'
+const e = d.transformFilename(f => String(f).toUpperCase()) // AbsolutePath: '/other/REPORT.MD'
 ```
 
 #### Navigation
