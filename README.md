@@ -7,7 +7,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@thingts/path)](https://bundlephobia.com/package/@thingts/path)
 
 
-Type-safe, ergonomic package for working with paths, in any JavaScript environment (Node.js, Deno, browser, etc.)
+Type-safe, ergonomic package for working with paths, in pure javascript (brwoser-safe, no node.js dependencies).
 
 ## Why?
 
