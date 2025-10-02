@@ -4,7 +4,6 @@
   "description": "Type-safe, ergonomic package for working with paths in any javascript environment",
   "keywords": [
     "browser",
-    "deno",
     "extension",
     "filename",
     "filepath",
