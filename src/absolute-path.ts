@@ -49,7 +49,11 @@ export class AbsolutePath extends PathBase {
    */
   constructor(path: string | AbsolutePath) {
     super()
-    this.path_ = AbsolutePath.#canonicalize(String(path))
+    path = String(path)
+    if (!AbsolutePath.isAbsolutePathString(path)) {
+      throw new Error(`Path must be absolute: "${path}"`)
+    }
+    this.path_ = AbsolutePath.#canonicalize(path)
   }
 
   static #canonicalize(p: string): string {

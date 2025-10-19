@@ -9,6 +9,12 @@ describe('AbsolutePath', () => {
       expect(String(p)).toBe('/bar/baz.txt')
     })
 
+    it('throws if given a relative path', () => {
+      expect(() => new AbsolutePath('foo/bar/baz.txt')).toThrow()
+      expect(() => new AbsolutePath('./foo/bar')).toThrow()
+      expect(() => new AbsolutePath('../foo/bar')).toThrow()
+    })
+
   })
 
   describe('path properties and manipulation', () => {
