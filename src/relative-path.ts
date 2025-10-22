@@ -2,7 +2,7 @@ import * as path from './path-tools'
 import { PathBase } from './path-base'
 
 /**
- * Represents an relative filesystem path (i.e. a path that doesn't start at
+ * Represents a relative filesystem path (i.e. a path that doesn't start at
  * the root, i.e. doesn't have a leading separator) and is not, and provides
  * methods for path manipulation and queries.
  *
