@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@thingts/path.svg)](https://www.npmjs.com/package/@thingts/path)
 [![docs](https://img.shields.io/badge/docs-typedoc-blue)](https://thingts.github.io/path/)
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/path/ci.yaml)](https://github.com/thingts/path/actions/workflows/ci.yaml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/thingts/path/ci.yml)](https://github.com/thingts/path/actions/workflows/ci.yml)
 [![GitHub License](https://img.shields.io/github/license/thingts/path)](LICENSE)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/@thingts/path)](https://bundlephobia.com/package/@thingts/path)
 
