@@ -60,8 +60,8 @@ function normalizeSegments(segments: readonly string[]): string {
   const normalized: string[] = []
   for (const segment of segments) {
     if (!segment || segment === '.') continue
-    if (segment === '..') {
-      if (normalized.length > 0 && normalized.at(-1) !== '..') normalized.pop()
+    if (segment === '..' && normalized.length > 0 && normalized.at(-1) !== '..') {
+      normalized.pop()
     } else {
       normalized.push(segment)
     }
