@@ -6,7 +6,8 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "paths": {
-      "$src": ["src/index.ts"]
+      "$src": ["src/index.ts"],
+      "$src/*": ["src/*"]
     },
     "strict": true,
     "strictNullChecks": true,
