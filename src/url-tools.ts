@@ -23,16 +23,16 @@ export function parse(s: string): UrlPathParts {
   const endify       = (x: number): number => (x === -1) ? s.length : x
   const hashIndex    = endify(s.lastIndexOf('#'))
   const queryIndex   = endify(s.lastIndexOf('?'))
-  const anchorIndex  = (queryIndex === s.length || queryIndex < hashIndex) ? hashIndex : s.length
-  const pathEndIndex = Math.min(anchorIndex, queryIndex)
+  const fragmentIndex  = (queryIndex === s.length || queryIndex < hashIndex) ? hashIndex : s.length
+  const pathEndIndex = Math.min(fragmentIndex, queryIndex)
 
   const pathname = s.slice(0, pathEndIndex)
-  const queryStr = queryIndex < anchorIndex ? s.slice(queryIndex + 1, anchorIndex) : undefined
-  const anchor = anchorIndex < s.length-1 ? s.slice(anchorIndex + 1) : undefined
+  const queryStr = queryIndex < fragmentIndex ? s.slice(queryIndex + 1, fragmentIndex) : undefined
+  const fragment = fragmentIndex < s.length-1 ? s.slice(fragmentIndex + 1) : undefined
   return {
     pathname: normalizePathname(pathname),
     query: queryStr ? parseQuery(queryStr) : undefined,
-    anchor
+    fragment
   }
 }
 
@@ -62,7 +62,7 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString:
   let origin   = baseOrigin
   let pathname = cur.pathname
   let query    = { ...cur.query }
-  let anchor   = cur.anchor
+  let fragment   = cur.fragment
   for (const s of segments) {
     let relOrigin: string | undefined = undefined
 
@@ -76,7 +76,7 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString:
       str       = u.href.slice(u.origin.length)
       relOrigin = u.origin
     }
-    const { pathname: relPathname, query: relQuery, anchor: relAnchor } = parse(str)
+    const { pathname: relPathname, query: relQuery, fragment: relFragment } = parse(str)
 
     if (isResolve) {
       if (detectOrigin && isNonHierarchical) {
@@ -86,24 +86,24 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString:
         origin = relOrigin ?? origin
         pathname = relPathname
         query = { ...relQuery }
-        anchor = relAnchor
+        fragment = relFragment
         continue
       }
     }
     pathname = `${pathname}/${relPathname}`
     query = { ...query, ...relQuery }
-    if (relAnchor) { anchor = relAnchor }
+    if (relFragment) { fragment = relFragment }
   }
-  return { origin, pathname: normalizePathname(pathname), query, anchor }
+  return { origin, pathname: normalizePathname(pathname), query, fragment }
 
 }
 
 
 export function buildPath(params: UrlPathParts): string {
-  const { pathname, query, anchor } = params
-  const anchorString = anchor ? ensureLeadingHash(anchor) : ''
+  const { pathname, query, fragment } = params
+  const fragmentString = fragment ? ensureLeadingHash(fragment) : ''
   const queryString  = query  ? queryToString(query)      : ''
-  return `${pathname}${queryString}${anchorString}`
+  return `${pathname}${queryString}${fragmentString}`
 }
 
 export function newURL(s: string): URL {

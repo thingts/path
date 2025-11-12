@@ -5,19 +5,19 @@ import { PathBase } from './path-base'
 
 /**
  * Base class for all URL-style path types.
- * Provides query + anchor handling and immutable join/resolve utilities.
+ * Provides query + fragment handling and immutable join/resolve utilities.
  */
 export abstract class UrlBase extends PathBase {
   protected path_: string
   protected readonly query_?: QueryParams
-  protected readonly anchor_?: string
+  protected readonly fragment_?: string
 
   constructor(path: string) {
     super()
-    const { pathname, query, anchor } = urt.parse(path)
+    const { pathname, query, fragment } = urt.parse(path)
     this.path_   = pathname
     this.query_  = query
-    this.anchor_ = anchor
+    this.fragment_ = fragment
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -26,13 +26,13 @@ export abstract class UrlBase extends PathBase {
 
   get pathname(): string { return this.path_ }
   get query():    QueryParams { return { ...this.query_ } }
-  get anchor():   string | undefined { return this.anchor_ }
+  get fragment():   string | undefined { return this.fragment_ }
 
   get #pathParts(): UrlPathParts {
     return {
       pathname: this.path_,
       query:    this.query_,
-      anchor:   this.anchor_,
+      fragment:   this.fragment_,
     }
   }
 
@@ -53,8 +53,8 @@ export abstract class UrlBase extends PathBase {
     return this.cloneWithParts({ query: merged })
   }
 
-  replaceAnchor(anchor: string): this {
-    return this.cloneWithParts({ anchor })
+  replaceFragment(fragment: string): this {
+    return this.cloneWithParts({ fragment })
   }
 
   join(...segments: readonly (string | UrlBase | null | undefined)[]): this {
@@ -64,23 +64,23 @@ export abstract class UrlBase extends PathBase {
 
   /**
    * Protected helper to construct a new path string, optionally given any of a
-   * new pathname, query, or anchor.  Any not provided will default to the
+   * new pathname, query, or fragment.  Any not provided will default to the
    * current instance's value.
    *
    * Used by all mutation-like methods to build the new path string.
    */
   protected nextPathString(params: Partial<UrlPathParts>): string {
-    const { pathname, query, anchor } = params
+    const { pathname, query, fragment } = params
     return urt.buildPath({
       pathname: pathname ?? this.pathname,
       query:    query ?? this.query,
-      anchor:   anchor ?? this.anchor
+      fragment:   fragment ?? this.fragment
     })
   }
 
   /*
    * Protected factory to construct a new instance of the current class,
-   * optionally given any of a new pathname, query, or anchor.  Any not
+   * optionally given any of a new pathname, query, or fragment.  Any not
    * provided will default to the current instance's value.
    *
    * Used by all mutation-like methods to return a new instance of the same
@@ -88,7 +88,7 @@ export abstract class UrlBase extends PathBase {
    * instances of themselves without needing to override them.
    *
    * Unlike cloneWithPath() in PathBase, this version accepts optional pathname,
-   * query, or anchor; in fact the cloneWithPath() version is implemented in terms of
+   * query, or fragment; in fact the cloneWithPath() version is implemented in terms of
    * this one, for creating a new instance with just a new pathname.
    */
   protected cloneWithParts(params: Partial<UrlPathParts>): this {

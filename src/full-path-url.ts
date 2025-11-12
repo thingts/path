@@ -5,7 +5,7 @@ import type { UrlPathParts } from './url-types'
 import { UrlBase } from './url-base'
 
 /**
- * Fully qualified URL with origin, pathname, query, and anchor.
+ * Fully qualified URL with origin, pathname, query, and fragment.
  * Immutable, compositional, and consistent with PathBase.
  */
 export class FullPathUrl extends UrlBase {

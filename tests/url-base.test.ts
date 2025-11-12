@@ -17,23 +17,23 @@ describe('UrlBase', () => {
       expect(String(u)).toBe('/a%20b/c%23d?e=f&g=h')
     })
 
-    it('stores and exposes query and anchor cleanly', () => {
+    it('stores and exposes query and fragment cleanly', () => {
       const u = new TestUrlPath('/a?a=1&b=x&b=y#frag')
       expect(u.query).toEqual({ a: '1', b: ['x', 'y'] })
-      expect(u.anchor).toBe('frag')
+      expect(u.fragment).toBe('frag')
     })
 
     describe('edge cases', () => {
-      it('handles anchor without query', () => {
+      it('handles fragment without query', () => {
         const u = new TestUrlPath('/a#frag')
         expect(u.query).toEqual({})
-        expect(u.anchor).toBe('frag')
+        expect(u.fragment).toBe('frag')
       })
 
-      it('handles query without anchor', () => {
+      it('handles query without fragment', () => {
         const u = new TestUrlPath('/a?b=2')
         expect(u.query).toEqual({ b: '2' })
-        expect(u.anchor).toBe(undefined)
+        expect(u.fragment).toBe(undefined)
       })
 
       describe('with root', () => {
@@ -41,28 +41,28 @@ describe('UrlBase', () => {
           const u = new TestUrlPath('/')
           expect(u.pathname).toBe('/')
           expect(u.query).toEqual({})
-          expect(u.anchor).toBe(undefined)
+          expect(u.fragment).toBe(undefined)
         })
 
-        it('handles query and anchor', () => {
+        it('handles query and fragment', () => {
           const u = new TestUrlPath('/?b=2#frag')
           expect(u.pathname).toBe('/')
           expect(u.query).toEqual({ b: '2' })
-          expect(u.anchor).toBe('frag')
+          expect(u.fragment).toBe('frag')
         })
 
         it('handles query alone', () => {
           const u = new TestUrlPath('/?b=2')
           expect(u.pathname).toBe('/')
           expect(u.query).toEqual({ b: '2' })
-          expect(u.anchor).toBe(undefined)
+          expect(u.fragment).toBe(undefined)
         })
 
-        it('handles anchor alone', () => {
+        it('handles fragment alone', () => {
           const u = new TestUrlPath('/#frag')
           expect(u.pathname).toBe('/')
           expect(u.query).toEqual({})
-          expect(u.anchor).toBe('frag')
+          expect(u.fragment).toBe('frag')
         })
       })
 
@@ -71,28 +71,28 @@ describe('UrlBase', () => {
           const u = new TestUrlPath('')
           expect(u.pathname).toBe('')
           expect(u.query).toEqual({})
-          expect(u.anchor).toBe(undefined)
+          expect(u.fragment).toBe(undefined)
         })
 
-        it('handles query and anchor', () => {
+        it('handles query and fragment', () => {
           const u = new TestUrlPath('?b=2#frag')
           expect(u.pathname).toBe('')
           expect(u.query).toEqual({ b: '2' })
-          expect(u.anchor).toBe('frag')
+          expect(u.fragment).toBe('frag')
         })
 
         it('handles query alone', () => {
           const u = new TestUrlPath('?b=2')
           expect(u.pathname).toBe('')
           expect(u.query).toEqual({ b: '2' })
-          expect(u.anchor).toBe(undefined)
+          expect(u.fragment).toBe(undefined)
         })
 
-        it('handles anchor alone', () => {
+        it('handles fragment alone', () => {
           const u = new TestUrlPath('#frag')
           expect(u.pathname).toBe('')
           expect(u.query).toEqual({})
-          expect(u.anchor).toBe('frag')
+          expect(u.fragment).toBe('frag')
         })
       })
 
@@ -135,10 +135,10 @@ describe('UrlBase', () => {
     expect(String(v)).toBe('/foo?a=1&b=2&c=3')
   })
 
-  it('replaceAnchor strips leading #', () => {
+  it('replaceFragment strips leading #', () => {
     const u = new TestUrlPath('/foo#a')
-    const v = u.replaceAnchor('#b')
-    expect(v.anchor).toBe('b')
+    const v = u.replaceFragment('#b')
+    expect(v.fragment).toBe('b')
     expect(String(v)).toBe('/foo#b')
   })
 })

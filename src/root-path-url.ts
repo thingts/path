@@ -15,21 +15,21 @@ export class RootPathUrl extends UrlBase {
   resolve(...segments: readonly (string | RelativePathUrl | RootPathUrl | RelativePath | AbsolutePath | null | undefined)[]): RootPathUrl {
     let pathname = this.pathname
     let query = { ...this.query }
-    let anchor = this.anchor
+    let fragment = this.fragment
     for (const s of segments) {
       if (!s) continue
-      const { pathname: relPathname, query: relQuery, anchor: relAnchor } = urt.parse(String(s))
+      const { pathname: relPathname, query: relQuery, fragment: relFragment } = urt.parse(String(s))
       if (relPathname.startsWith('/')) {
         pathname   = relPathname
         query  = relQuery ?? {}
-        anchor = relAnchor
+        fragment = relFragment
       } else {
         pathname = [pathname.replace(/\/$/, ''), relPathname].filter(Boolean).join('/')
         query = { ...query, ...relQuery }
-        if (relAnchor) anchor = relAnchor
+        if (relFragment) fragment = relFragment
       }
     }
-    return new RootPathUrl(urt.buildPath({ pathname, query, anchor }))
+    return new RootPathUrl(urt.buildPath({ pathname, query, fragment }))
   }
 
   static isRootPathUrlString(s: string): boolean {

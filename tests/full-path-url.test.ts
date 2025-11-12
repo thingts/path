@@ -3,12 +3,12 @@ import { FullPathUrl } from '$src'
 
 
 describe('FullPathUrl', () => {
-  it('parses and exposes origin, pathname, query, anchor', () => {
+  it('parses and exposes origin, pathname, query, fragment', () => {
     const u = new FullPathUrl('https://x.com/foo/bar?a=1#frag')
     expect(u.origin).toBe('https://x.com')
     expect(u.pathname).toBe('/foo/bar')
     expect(u.query).toEqual({ a: '1' })
-    expect(u.anchor).toBe('frag')
+    expect(u.fragment).toBe('frag')
   })
 
   it('throws on invalid URL', () => {
@@ -16,7 +16,7 @@ describe('FullPathUrl', () => {
     expect(() => new FullPathUrl('http://badc[aracter.com')).toThrow(/Invalid URL/)
   })
 
-  it('join() merges query params and replaces anchor', () => {
+  it('join() merges query params and replaces fragment', () => {
     const u = new FullPathUrl('https://x.com/foo?a=a1&b=b1#old')
     const v = u.join('bar?b=b2&c=c2#new')
     expect(v.toString()).toBe('https://x.com/foo/bar?a=a1&b=b2&c=c2#new')
