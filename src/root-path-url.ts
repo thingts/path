@@ -4,15 +4,15 @@ import type { RelativePath } from './relative-path'
 import type { RelativeUrlPath } from './relative-url-path'
 import { UrlBase } from './url-base'
 
-export class RootUrlPath extends UrlBase {
+export class RootPathUrl extends UrlBase {
   constructor(path: string) {
-    if (!RootUrlPath.isRootUrlPathString(path)) {
-      throw new Error(`RootUrlPath must start with '/': ${path}`)
+    if (!RootPathUrl.isRootPathUrlString(path)) {
+      throw new Error(`RootPathUrl must start with '/': ${path}`)
     }
     super(path)
   }
 
-  resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | RelativePath | AbsolutePath | null | undefined)[]): RootUrlPath {
+  resolve(...segments: readonly (string | RelativeUrlPath | RootPathUrl | RelativePath | AbsolutePath | null | undefined)[]): RootPathUrl {
     let pathname = this.pathname
     let query = { ...this.query }
     let anchor = this.anchor
@@ -29,10 +29,10 @@ export class RootUrlPath extends UrlBase {
         if (relAnchor) anchor = relAnchor
       }
     }
-    return new RootUrlPath(urt.buildPath({ pathname, query, anchor }))
+    return new RootPathUrl(urt.buildPath({ pathname, query, anchor }))
   }
 
-  static isRootUrlPathString(s: string): boolean {
+  static isRootPathUrlString(s: string): boolean {
     return s.startsWith('/')
   }
 

@@ -2,22 +2,22 @@ import * as urt from './url-tools'
 import type { FilenameBase } from './filename-base'
 import { FullPathUrl } from './full-path-url'
 import { RelativeUrlPath } from './relative-url-path'
-import { RootUrlPath } from './root-url-path'
+import { RootPathUrl } from './root-path-url'
 
 /**
  * Generic constructor for URL path objects.
  *
- * Returns a {@link FullPathUrl}, {@link RootUrlPath}, or {@link RelativeUrlPath}
+ * Returns a {@link FullPathUrl}, {@link RootPathUrl}, or {@link RelativeUrlPath}
  * depending on the input string.
  *
  * @example
  * ```
  * urlPath('https://x.com/foo') → FullPathUrl
- * urlPath('/foo/bar')          → RootUrlPath
+ * urlPath('/foo/bar')          → RootPathUrl
  * urlPath('foo/bar')           → RelativeUrlPath
  * ```
  */
-export function urlPath(path: string | FilenameBase): FullPathUrl | RootUrlPath | RelativeUrlPath {
+export function urlPath(path: string | FilenameBase): FullPathUrl | RootPathUrl | RelativeUrlPath {
 
   const s = String(path)
 
@@ -29,8 +29,8 @@ export function urlPath(path: string | FilenameBase): FullPathUrl | RootUrlPath 
     throw new Error(`Cannot create path URL from non-hierarchical URL: ${s}`)
   }
 
-  if (RootUrlPath.isRootUrlPathString(s)) {
-    return new RootUrlPath(s)
+  if (RootPathUrl.isRootPathUrlString(s)) {
+    return new RootPathUrl(s)
   }
 
   if (RelativeUrlPath.isRelativeUrlPathString(s)) {

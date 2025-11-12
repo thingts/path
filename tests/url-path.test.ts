@@ -9,9 +9,9 @@ describe('urlPath', () => {
     expect(String(u)).toBe('https://example.com/foo/bar?a=1#frag')
   })
 
-  it('creates RootUrlPath for rooted paths', () => {
+  it('creates RootPathUrl for rooted paths', () => {
     const u = urlPath('/foo/bar?a=1#frag')
-    expect(u.constructor.name).toBe('RootUrlPath')
+    expect(u.constructor.name).toBe('RootPathUrl')
     expect(String(u)).toBe('/foo/bar?a=1#frag')
   })
 

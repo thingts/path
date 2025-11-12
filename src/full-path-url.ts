@@ -1,6 +1,6 @@
 import * as urt from './url-tools'
 import type { RelativeUrlPath } from './relative-url-path'
-import type { RootUrlPath } from './root-url-path'
+import type { RootPathUrl } from './root-path-url'
 import type { UrlPathParts } from './url-types'
 import { UrlBase } from './url-base'
 
@@ -27,7 +27,7 @@ export class FullPathUrl extends UrlBase {
   /**
    * Resolve a relative, root, or host URL against this one.
    */
-  resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | FullPathUrl | null | undefined)[]): FullPathUrl {
+  resolve(...segments: readonly (string | RelativeUrlPath | RootPathUrl | FullPathUrl | null | undefined)[]): FullPathUrl {
     const { origin, ...parts } = urt.joinOrResolve(this, segments, { mode: 'resolve', baseOrigin: this.origin_ })
     return new FullPathUrl(`${origin}${urt.buildPath(parts)}`)
   }
