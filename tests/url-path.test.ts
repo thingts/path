@@ -15,9 +15,9 @@ describe('urlPath', () => {
     expect(String(u)).toBe('/foo/bar?a=1#frag')
   })
 
-  it('creates RelativeUrlPath for relative paths', () => {
+  it('creates RelativePathUrl for relative paths', () => {
     const u = urlPath('foo/bar?a=1#frag')
-    expect(u.constructor.name).toBe('RelativeUrlPath')
+    expect(u.constructor.name).toBe('RelativePathUrl')
     expect(String(u)).toBe('foo/bar?a=1#frag')
   })
 

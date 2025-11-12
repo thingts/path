@@ -1,7 +1,7 @@
 import * as urt from './url-tools'
 import type { AbsolutePath } from './absolute-path'
 import type { RelativePath } from './relative-path'
-import type { RelativeUrlPath } from './relative-url-path'
+import type { RelativePathUrl } from './relative-path-url'
 import { UrlBase } from './url-base'
 
 export class RootPathUrl extends UrlBase {
@@ -12,7 +12,7 @@ export class RootPathUrl extends UrlBase {
     super(path)
   }
 
-  resolve(...segments: readonly (string | RelativeUrlPath | RootPathUrl | RelativePath | AbsolutePath | null | undefined)[]): RootPathUrl {
+  resolve(...segments: readonly (string | RelativePathUrl | RootPathUrl | RelativePath | AbsolutePath | null | undefined)[]): RootPathUrl {
     let pathname = this.pathname
     let query = { ...this.query }
     let anchor = this.anchor
