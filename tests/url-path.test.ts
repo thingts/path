@@ -3,9 +3,9 @@ import { urlPath } from '$src'
 
 
 describe('urlPath', () => {
-  it('creates HostUrlPath for full URLs', () => {
+  it('creates FullPathUrl for full URLs', () => {
     const u = urlPath('https://example.com/foo/bar?a=1#frag')
-    expect(u.constructor.name).toBe('HostUrlPath')
+    expect(u.constructor.name).toBe('FullPathUrl')
     expect(String(u)).toBe('https://example.com/foo/bar?a=1#frag')
   })
 

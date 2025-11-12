@@ -8,11 +8,11 @@ import { UrlBase } from './url-base'
  * Fully qualified URL with origin, pathname, query, and anchor.
  * Immutable, compositional, and consistent with PathBase.
  */
-export class HostUrlPath extends UrlBase {
+export class FullPathUrl extends UrlBase {
   readonly origin_: string
 
-  constructor(url: string | URL | HostUrlPath) {
-    const u = (url instanceof URL) ? url : (url instanceof HostUrlPath) ? url.toURL() : urt.newURL(url)
+  constructor(url: string | URL | FullPathUrl) {
+    const u = (url instanceof URL) ? url : (url instanceof FullPathUrl) ? url.toURL() : urt.newURL(url)
     super(u.href.slice(u.origin.length))
     this.origin_ = u.origin
   }
@@ -27,15 +27,15 @@ export class HostUrlPath extends UrlBase {
   /**
    * Resolve a relative, root, or host URL against this one.
    */
-  resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | HostUrlPath | null | undefined)[]): HostUrlPath {
+  resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | FullPathUrl | null | undefined)[]): FullPathUrl {
     const { origin, ...parts } = urt.joinOrResolve(this, segments, { mode: 'resolve', baseOrigin: this.origin_ })
-    return new HostUrlPath(`${origin}${urt.buildPath(parts)}`)
+    return new FullPathUrl(`${origin}${urt.buildPath(parts)}`)
   }
 
 
-  replaceOrigin(origin: string | HostUrlPath): HostUrlPath {
-    const o = origin instanceof HostUrlPath ? origin.origin_ : origin
-    return new HostUrlPath(`${o}${this.toString().replace(/^[^/]+\/\/[^/]+/, '')}`)
+  replaceOrigin(origin: string | FullPathUrl): FullPathUrl {
+    const o = origin instanceof FullPathUrl ? origin.origin_ : origin
+    return new FullPathUrl(`${o}${this.toString().replace(/^[^/]+\/\/[^/]+/, '')}`)
   }
 
   toString(): string {
@@ -46,7 +46,7 @@ export class HostUrlPath extends UrlBase {
     return new URL(this.toString())
   }
 
-  static isHostUrlPathString(s: string): boolean {
+  static isFullPathUrlString(s: string): boolean {
     return urt.isHierarchicalUrl(s)
   }
 

@@ -1,7 +1,7 @@
 export { AbsolutePath } from './absolute-path'
 export { Filename } from './filename'
 export { RelativePath } from './relative-path'
-export { HostUrlPath } from './host-url-path'
+export { FullPathUrl } from './full-path-url'
 export { RootUrlPath } from './root-url-path'
 export { RelativeUrlPath } from './relative-url-path'
 export { urlPath } from './url-path'
