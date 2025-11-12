@@ -12,12 +12,12 @@ import { RootPathUrl } from './root-path-url'
  *
  * @example
  * ```
- * urlPath('https://x.com/foo') → FullPathUrl
- * urlPath('/foo/bar')          → RootPathUrl
- * urlPath('foo/bar')           → RelativePathUrl
+ * pathUrl('https://x.com/foo') → FullPathUrl
+ * pathUrl('/foo/bar')          → RootPathUrl
+ * pathUrl('foo/bar')           → RelativePathUrl
  * ```
  */
-export function urlPath(path: string | FilenameBase): FullPathUrl | RootPathUrl | RelativePathUrl {
+export function pathUrl(path: string | FilenameBase): FullPathUrl | RootPathUrl | RelativePathUrl {
 
   const s = String(path)
 
