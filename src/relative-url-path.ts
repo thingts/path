@@ -1,6 +1,6 @@
-import { UrlPathBase } from './url-path-base'
+import { UrlBase } from './url-base'
 
-export class RelativeUrlPath extends UrlPathBase {
+export class RelativeUrlPath extends UrlBase {
   constructor(path: string) {
     if (!RelativeUrlPath.isRelativeUrlPathString(path)) {
       throw new Error(`RelativeUrlPath must not start with '/': ${path}`)

@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { UrlPathBase } from '../src/url-path-base'
+import { UrlBase } from '../src/url-base'
 
-class TestUrlPath extends UrlPathBase {
+class TestUrlPath extends UrlBase {
 }
 
-describe('UrlPathBase', () => {
+describe('UrlBase', () => {
   describe('constructor', () => {
     it('normalizes path slashes', () => {
       const u = new TestUrlPath('/foo//bad/../bar////./baz')

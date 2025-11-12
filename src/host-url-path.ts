@@ -2,13 +2,13 @@ import * as urt from './url-tools'
 import type { RelativeUrlPath } from './relative-url-path'
 import type { RootUrlPath } from './root-url-path'
 import type { UrlPathParts } from './url-types'
-import { UrlPathBase } from './url-path-base'
+import { UrlBase } from './url-base'
 
 /**
  * Fully qualified URL with origin, pathname, query, and anchor.
  * Immutable, compositional, and consistent with PathBase.
  */
-export class HostUrlPath extends UrlPathBase {
+export class HostUrlPath extends UrlBase {
   readonly origin_: string
 
   constructor(url: string | URL | HostUrlPath) {

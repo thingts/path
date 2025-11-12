@@ -7,7 +7,7 @@ import { PathBase } from './path-base'
  * Base class for all URL-style path types.
  * Provides query + anchor handling and immutable join/resolve utilities.
  */
-export abstract class UrlPathBase extends PathBase {
+export abstract class UrlBase extends PathBase {
   protected path_: string
   protected readonly query_?: QueryParams
   protected readonly anchor_?: string
@@ -57,7 +57,7 @@ export abstract class UrlPathBase extends PathBase {
     return this.cloneWithParts({ anchor })
   }
 
-  join(...segments: readonly (string | UrlPathBase | null | undefined)[]): this {
+  join(...segments: readonly (string | UrlBase | null | undefined)[]): this {
     const pathParts = urt.joinOrResolve(this.#pathParts, segments, { mode: 'join' })
     return this.cloneWithParts(pathParts)
   }

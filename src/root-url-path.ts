@@ -2,9 +2,9 @@ import * as urt from './url-tools'
 import type { AbsolutePath } from './absolute-path'
 import type { RelativePath } from './relative-path'
 import type { RelativeUrlPath } from './relative-url-path'
-import { UrlPathBase } from './url-path-base'
+import { UrlBase } from './url-base'
 
-export class RootUrlPath extends UrlPathBase {
+export class RootUrlPath extends UrlBase {
   constructor(path: string) {
     if (!RootUrlPath.isRootUrlPathString(path)) {
       throw new Error(`RootUrlPath must start with '/': ${path}`)
