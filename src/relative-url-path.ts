@@ -1,14 +1,14 @@
-import * as urt from './url-tools'
 import { UrlPathBase } from './url-path-base'
 
 export class RelativeUrlPath extends UrlPathBase {
-  constructor(
-    path: string,
-  ) {
-    urt.validatePath(path)
-    if (path.startsWith('/')) {
+  constructor(path: string) {
+    if (!RelativeUrlPath.isRelativeUrlPathString(path)) {
       throw new Error(`RelativeUrlPath must not start with '/': ${path}`)
     }
     super(path)
+  }
+
+  static isRelativeUrlPathString(s: string): boolean {
+    return !s.startsWith('/')
   }
 }

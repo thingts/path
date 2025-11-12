@@ -23,9 +23,15 @@ export function urlPath(path: string | FilenameBase): HostUrlPath | RootUrlPath 
   if (HostUrlPath.isHostUrlPathString(s)) {
     return new HostUrlPath(s)
   }
+
   if (RootUrlPath.isRootUrlPathString(s)) {
     return new RootUrlPath(s)
   }
 
-  return new RelativeUrlPath(s)
+  if (RelativeUrlPath.isRelativeUrlPathString(s)) {
+    return new RelativeUrlPath(s)
+  }
+
+  // Should never happen
+  throw new Error(`Cannot determine URL path type: ${s}`)
 }

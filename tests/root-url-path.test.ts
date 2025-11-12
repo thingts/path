@@ -15,6 +15,11 @@ describe('RootUrlPath', () => {
     })
   })
 
+  it('pathName has leading slash', () => {
+    const u = new RootUrlPath('/foo/bar')
+    expect(u.pathname).toBe('/foo/bar')
+  })
+
 
   it('toString includes query and anchor', () => {
     const u = new RootUrlPath('/foo/bar').replaceQuery({ a: '1' }).replaceAnchor('frag')

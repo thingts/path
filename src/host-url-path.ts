@@ -1,7 +1,8 @@
+import * as urt from './url-tools'
 import type { RelativeUrlPath } from './relative-url-path'
+import type { UrlPathParts } from './url-types'
 import { RootUrlPath } from './root-url-path'
 import { UrlPathBase } from './url-path-base'
-import * as urt from './url-tools'
 
 /**
  * Fully qualified URL with origin, pathname, query, and anchor.
@@ -11,9 +12,7 @@ export class HostUrlPath extends UrlPathBase {
   readonly origin_: string
 
   constructor(url: string | URL | HostUrlPath) {
-    const u = url instanceof HostUrlPath ? url.toURL()
-            : url instanceof URL ? url
-            : urt.newURL(String(url)) // eslint-disable-line @typescript-eslint/no-unnecessary-type-conversion
+    const u = (url instanceof URL) ? url : (url instanceof HostUrlPath) ? url.toURL() : urt.newURL(url)
     super(u.href.slice(u.origin.length))
     this.origin_ = u.origin
   }
@@ -28,9 +27,7 @@ export class HostUrlPath extends UrlPathBase {
   /**
    * Resolve a relative, root, or host URL against this one.
    */
-  resolve(
-    ...segments: readonly (string | RelativeUrlPath | RootUrlPath | HostUrlPath | null | undefined)[]
-  ): HostUrlPath {
+  resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | HostUrlPath | null | undefined)[]): HostUrlPath {
     let current = new URL(this.toString())
     for (const s of segments) {
       if (!s) {
@@ -79,14 +76,9 @@ export class HostUrlPath extends UrlPathBase {
     return /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)
   }
 
-  protected override newSelfUrl(params: { pathname?: string, query?: Record<string, string | string[]>, anchor?: string }): this {
+  protected override cloneWithParts(params: Partial<UrlPathParts>): this {
     const ctor = this.constructor as new(path: string) => this
-    const { pathname, query, anchor } = params
-    const path = urt.buildPath({
-      pathname: pathname ?? this.pathname,
-      query:    query ?? this.query,
-      anchor:   anchor ?? this.anchor
-    })
+    const path = this.nextPathString(params)
     return new ctor(`${this.origin_}${path}`)
   }
 

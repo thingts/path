@@ -1,21 +1,21 @@
-import type { FilenameBase } from './filename-base'
-import { PathBase } from './path-base'
 import * as urt from './url-tools'
+import type { FilenameBase } from './filename-base'
+import type { QueryParams, UrlPathParts } from './url-types'
+import { PathBase } from './path-base'
 
 /**
  * Base class for all URL-style path types.
  * Provides query + anchor handling and immutable join/resolve utilities.
  */
 export abstract class UrlPathBase extends PathBase {
-  /** Normalized path (inherited contract) */
   protected path_: string
-  protected readonly query_: Record<string, string | string[]>
-  protected readonly anchor_: string
+  protected readonly query_?: QueryParams
+  protected readonly anchor_?: string
 
   constructor(path: string) {
     super()
     const { pathname, query, anchor } = urt.parse(path)
-    this.path_   = urt.normalize(pathname)
+    this.path_   = pathname
     this.query_  = query
     this.anchor_ = anchor
   }
@@ -25,38 +25,57 @@ export abstract class UrlPathBase extends PathBase {
   /////////////////////////////////////////////////////////////////////////////
 
   get pathname(): string { return this.path_ }
-  get query(): Record<string, string | string[]> { return { ...this.query_ } }
-  get anchor(): string { return this.anchor_ }
+  get query():    QueryParams { return { ...this.query_ } }
+  get anchor():   string | undefined { return this.anchor_ }
+
+  get #pathParts(): UrlPathParts {
+    return {
+      pathname: this.path_,
+      query:    this.query_,
+      anchor:   this.anchor_,
+    }
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // --- Mutation-like (immutable) operations ---------------------------------
   /////////////////////////////////////////////////////////////////////////////
 
   replacePathname(path: string | FilenameBase): this {
-    return this.newSelfUrl({ pathname: String(path) })
+    return this.cloneWithParts({ pathname: String(path) })
   }
 
-  replaceQuery(query: Record<string, string | string[]>): this {
-    return this.newSelfUrl({ query })
+  replaceQuery(query: QueryParams): this {
+    return this.cloneWithParts({ query })
   }
 
-  mergeQuery(query: Record<string, string | string[]>): this {
-    const merged: Record<string, string | string[]> = { ...this.query_, ...query }
-    return this.newSelfUrl({ query: merged })
+  mergeQuery(query: QueryParams): this {
+    const merged: QueryParams = { ...this.query_, ...query }
+    return this.cloneWithParts({ query: merged })
   }
 
   replaceAnchor(anchor: string): this {
-    return this.newSelfUrl({ anchor })
+    return this.cloneWithParts({ anchor })
   }
 
   join(...segments: readonly (string | UrlPathBase | null | undefined)[]): this {
-    const { pathname, query, anchor } = urt.join({
-      pathname: this.pathname,
-      query:    this.query,
-      anchor:   this.anchor
-    }, segments)
+    const pathParts = urt.join(this.#pathParts, segments)
+    return this.cloneWithParts(pathParts)
+  }
 
-    return this.newSelfUrl({ pathname, query, anchor })
+  /**
+   * Protected helper to construct a new path string, optionally given any of a
+   * new pathname, query, or anchor.  Any not provided will default to the
+   * current instance's value.
+   *
+   * Used by all mutation-like methods to build the new path string.
+   */
+  protected nextPathString(params: Partial<UrlPathParts>): string {
+    const { pathname, query, anchor } = params
+    return urt.buildPath({
+      pathname: pathname ?? this.pathname,
+      query:    query ?? this.query,
+      anchor:   anchor ?? this.anchor
+    })
   }
 
   /*
@@ -68,23 +87,18 @@ export abstract class UrlPathBase extends PathBase {
    * class, allowing derived classes that inherit those methods to return new
    * instances of themselves without needing to override them.
    *
-   * Unlike newSelf() in PathBase, this version accepts optional pathname,
-   * query, or anchor; in fact the newSelf() version is implemented in terms of
-   * this one.
+   * Unlike cloneWithPath() in PathBase, this version accepts optional pathname,
+   * query, or anchor; in fact the cloneWithPath() version is implemented in terms of
+   * this one, for creating a new instance with just a new pathname.
    */
-  protected newSelfUrl(params: { pathname?: string, query?: Record<string, string | string[]>, anchor?: string }): this {
+  protected cloneWithParts(params: Partial<UrlPathParts>): this {
     const ctor = this.constructor as new(path: string) => this
-    const { pathname, query, anchor } = params
-    const path = urt.buildPath({
-      pathname: pathname ?? this.pathname,
-      query:    query ?? this.query,
-      anchor:   anchor ?? this.anchor
-    })
+    const path = this.nextPathString(params)
     return new ctor(path)
   }
 
-  override newSelf(pathname: string): this {
-    return this.newSelfUrl({ pathname })
+  override cloneWithPath(pathname: string): this {
+    return this.cloneWithParts({ pathname })
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -92,9 +106,7 @@ export abstract class UrlPathBase extends PathBase {
   /////////////////////////////////////////////////////////////////////////////
 
   toString(): string {
-    const queryString = urt.queryToString(this.query_)
-    const frag = this.anchor_ ? `#${this.anchor_}` : ''
-    return `${this.path_}${queryString}${frag}`
+    return urt.buildPath(this.#pathParts)
   }
 
 }

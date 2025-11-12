@@ -1,19 +1,8 @@
 import * as pathTools from './path-tools'
+import type { QueryParams, UrlPathParts } from './url-types'
 
-export function parse(s: string): { pathname: string, query: Record<string, string | string[]>, anchor: string } {
-  const match = s.match(/^([^?#]*)?(\?[^#]*)?(#.*)?$/)
-  if (!match) {
-    return { pathname: s, query: {}, anchor: '' }
-  }
-  return {
-    pathname: match[1] || '',
-    query:    match[2] ? parseQuery(match[2]) : {},
-    anchor:   match[3] ? match[3].slice(1) : ''
-  }
-}
-
-export function parseQuery(q: string): Record<string, string | string[]> {
-  const result: Record<string, string | string[]> = {}
+export function parseQuery(q: string): QueryParams {
+  const result: QueryParams = {}
   const str = q.startsWith('?') ? q.slice(1) : q
   for (const pair of str.split('&')) {
     if (!pair) continue
@@ -30,8 +19,26 @@ export function parseQuery(q: string): Record<string, string | string[]> {
   return result
 }
 
+export function parse(s: string): UrlPathParts {
+  const endify       = (x: number): number => (x === -1) ? s.length : x
+  const hashIndex    = endify(s.lastIndexOf('#'))
+  const queryIndex   = endify(s.lastIndexOf('?'))
+  const anchorIndex  = (queryIndex === s.length || queryIndex < hashIndex) ? hashIndex : s.length
+  const pathEndIndex = Math.min(anchorIndex, queryIndex)
+
+  const pathname = s.slice(0, pathEndIndex)
+  const queryStr = queryIndex < anchorIndex ? s.slice(queryIndex + 1, anchorIndex) : undefined
+  const anchor = anchorIndex < s.length-1 ? s.slice(anchorIndex + 1) : undefined
+  return {
+    pathname: normalizePathname(pathname),
+    query: queryStr ? parseQuery(queryStr) : undefined,
+    anchor
+  }
+}
+
+
 // Converts a query object back to a query string.  Canonicalizes by sorting keys.
-export function queryToString(q: Record<string, string | string[]>): string {
+export function queryToString(q: QueryParams): string {
   const entries = Object.entries(q).flatMap(([k, v]) =>
     Array.isArray(v) ? v.map(x => [k, x]) : [[k, v]]
   )
@@ -40,37 +47,32 @@ export function queryToString(q: Record<string, string | string[]>): string {
   return '?' + entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')
 }
 
-export function normalize(path: string): string {
-  return pathTools.normalize(path)
+export function normalizePathname(path: string): string {
+  const pathNormalized = pathTools.normalize(path)
+  if (pathNormalized === '.') return ''
+  return(encodeURI(pathNormalized).replace(/[?#]/g, encodeURIComponent)).replace(/%25/g, '%') // double-encoded % -> single-encoded
 }
 
-export function join(cur: { pathname: string, query: Record<string, string | string[]>, anchor: string }, segments: readonly ({ toString: () => string } | null | undefined)[]): { pathname: string, query: Record<string, string | string[]>, anchor: string } {
-  let path = cur.pathname
+
+export function join(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[]): UrlPathParts {
+  let pathname = cur.pathname
   let query = { ...cur.query }
   let anchor = cur.anchor
   for (const s of segments) {
     if (!s) continue
-    const { pathname, query: relQuery, anchor: a } = parse(s.toString())
-    path = [removeTrailingSlash(path), removeLeadingSlash(pathname)].filter(Boolean).join('/')
+    const { pathname: relPathname, query: relQuery, anchor: a } = parse(s.toString())
+    pathname = `${pathname}/${relPathname}`
     query = { ...query, ...relQuery }
     if (a) anchor = a
   }
-  return { pathname: path, query, anchor }
+  return { pathname: normalizePathname(pathname), query, anchor }
 }
 
-export function buildPath(params: { pathname: string, query: Record<string, string | string[]>, anchor: string }): string {
+export function buildPath(params: UrlPathParts): string {
   const { pathname, query, anchor } = params
   const anchorString = anchor ? ensureLeadingHash(anchor) : ''
-  const queryString = queryToString(query)
+  const queryString  = query  ? queryToString(query)      : ''
   return `${pathname}${queryString}${anchorString}`
-}
-
-export function validatePath(s: string): void {
-  try {
-    new URL(s, 'http://example.com')
-  } catch {
-    throw new Error(`Invalid URL path: ${s}`)
-  }
 }
 
 export function newURL(s: string): URL {
@@ -82,5 +84,3 @@ export function newURL(s: string): URL {
 }
 
 function ensureLeadingHash(s: string): string { return s.startsWith('#') ? s : `#${s}` }
-function removeTrailingSlash(s: string): string { return s.endsWith('/') ? s.slice(0, -1) : s }
-function removeLeadingSlash(s: string): string { return s.startsWith('/') ? s.slice(1) : s }

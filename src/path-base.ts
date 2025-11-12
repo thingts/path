@@ -17,9 +17,9 @@ export abstract class PathBase extends FilenameBase {
    *
    * The default implementation assumes the derived class's constructor takes
    * a single string argument (the path).  Derived classes with different
-   * constructor siguatures should override {@link newSelf}.
+   * constructor siguatures should override {@link cloneWithPath}.
    */
-  protected newSelf(path: string | FilenameBase): this {
+  protected cloneWithPath(path: string | FilenameBase): this {
     const ctor = this.constructor as new(path: string) => this
     return new ctor(String(path))
   }
@@ -52,7 +52,7 @@ export abstract class PathBase extends FilenameBase {
    * ```
    */
   get parent(): this {
-    return this.newSelf(path.dirname(this.path_))
+    return this.cloneWithPath(path.dirname(this.path_))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ export abstract class PathBase extends FilenameBase {
    * ```
    */
   join(...segments: readonly (string | null | undefined | FilenameBase)[]): this {
-    return this.newSelf((path.join(this.path_, ...segments.filter(s => s !== null && s !== undefined).map(s => String(s)))))
+    return this.cloneWithPath((path.join(this.path_, ...segments.filter(s => s !== null && s !== undefined).map(s => String(s)))))
   }
 
   /**
@@ -152,7 +152,7 @@ export abstract class PathBase extends FilenameBase {
    * ```
    */
   replaceParent(newParent: string | PathBase): this {
-    return this.newSelf(path.join(String(newParent), this.filename_))
+    return this.cloneWithPath(path.join(String(newParent), this.filename_))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ export abstract class PathBase extends FilenameBase {
   toString(): string                                        { return this.path_ }
 
   /** Returns true if this path equals the other path or string */
-  equals(other: string | PathBase): boolean                 { return this.path_ === this.newSelf(String(other)).path_ }
+  equals(other: string | PathBase): boolean                 { return this.path_ === this.cloneWithPath(String(other)).path_ }
 
   protected get filename_(): string                         { return path.basename(this.path_) }
   protected withFilename(filename: string|Filename): this { return this.parent.join(filename) }

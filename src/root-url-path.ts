@@ -5,19 +5,14 @@ import type { RelativeUrlPath } from './relative-url-path'
 import { UrlPathBase } from './url-path-base'
 
 export class RootUrlPath extends UrlPathBase {
-  constructor(
-    path: string,
-  ) {
-    urt.validatePath(path)
-    if (!path.startsWith('/')) {
+  constructor(path: string) {
+    if (!RootUrlPath.isRootUrlPathString(path)) {
       throw new Error(`RootUrlPath must start with '/': ${path}`)
     }
     super(path)
   }
 
-  resolve(
-    ...segments: readonly (string | RelativeUrlPath | RootUrlPath | RelativePath | AbsolutePath | null | undefined)[]
-  ): RootUrlPath {
+  resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | RelativePath | AbsolutePath | null | undefined)[]): RootUrlPath {
     let pathname = this.pathname
     let query = { ...this.query }
     let anchor = this.anchor
@@ -26,7 +21,7 @@ export class RootUrlPath extends UrlPathBase {
       const { pathname: relPathname, query: relQuery, anchor: relAnchor } = urt.parse(String(s))
       if (relPathname.startsWith('/')) {
         pathname   = relPathname
-        query  = relQuery
+        query  = relQuery ?? {}
         anchor = relAnchor
       } else {
         pathname = [pathname.replace(/\/$/, ''), relPathname].filter(Boolean).join('/')
