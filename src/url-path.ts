@@ -1,3 +1,4 @@
+import * as urt from './url-tools'
 import type { FilenameBase } from './filename-base'
 import { HostUrlPath } from './host-url-path'
 import { RelativeUrlPath } from './relative-url-path'
@@ -22,6 +23,10 @@ export function urlPath(path: string | FilenameBase): HostUrlPath | RootUrlPath 
 
   if (HostUrlPath.isHostUrlPathString(s)) {
     return new HostUrlPath(s)
+  }
+
+  if (urt.isNonHierarchicalUrl(s)) {
+    throw new Error(`Cannot create path URL from non-hierarchical URL: ${s}`)
   }
 
   if (RootUrlPath.isRootUrlPathString(s)) {

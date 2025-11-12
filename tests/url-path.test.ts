@@ -20,4 +20,8 @@ describe('urlPath', () => {
     expect(u.constructor.name).toBe('RelativeUrlPath')
     expect(String(u)).toBe('foo/bar?a=1#frag')
   })
+
+  it('throws error for non-hierarchical URLs', () => {
+    expect(() => urlPath('mailto:user@example.com')).toThrowError(/non-hierarchical/i)
+  })
 })

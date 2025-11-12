@@ -58,7 +58,7 @@ export abstract class UrlPathBase extends PathBase {
   }
 
   join(...segments: readonly (string | UrlPathBase | null | undefined)[]): this {
-    const pathParts = urt.join(this.#pathParts, segments)
+    const pathParts = urt.joinOrResolve(this.#pathParts, segments, { mode: 'join' })
     return this.cloneWithParts(pathParts)
   }
 

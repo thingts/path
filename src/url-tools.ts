@@ -53,20 +53,51 @@ export function normalizePathname(path: string): string {
   return(encodeURI(pathNormalized).replace(/[?#]/g, encodeURIComponent)).replace(/%25/g, '%') // double-encoded % -> single-encoded
 }
 
-
-export function join(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[]): UrlPathParts {
+export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[], opts: { mode: 'join' | 'resolve' }): UrlPathParts
+export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin: string}): UrlPathParts & { origin: string }
+export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin?: string}): UrlPathParts & { origin?: string } {
+  const { mode, baseOrigin } = opts
+  const isResolve = mode === 'resolve'
+  const detectOrigin = isResolve && (baseOrigin !== undefined)
+  let origin   = baseOrigin
   let pathname = cur.pathname
-  let query = { ...cur.query }
-  let anchor = cur.anchor
+  let query    = { ...cur.query }
+  let anchor   = cur.anchor
   for (const s of segments) {
-    if (!s) continue
-    const { pathname: relPathname, query: relQuery, anchor: a } = parse(s.toString())
+    let relOrigin: string | undefined = undefined
+
+    if (!s) { continue }
+    let str = s.toString()
+
+    const isHierarchical = isHierarchicalUrl(str)
+    const isNonHierarchical = isNonHierarchicalUrl(str)
+    if (isHierarchical && detectOrigin) {
+      const u   = new URL(str)
+      str       = u.href.slice(u.origin.length)
+      relOrigin = u.origin
+    }
+    const { pathname: relPathname, query: relQuery, anchor: relAnchor } = parse(str)
+
+    if (isResolve) {
+      if (detectOrigin && isNonHierarchical) {
+        throw new Error(`Cannot resolve non-hierarchical URL: ${str}`)
+      }
+      if (relOrigin || relPathname.startsWith('/')) {
+        origin = relOrigin ?? origin
+        pathname = relPathname
+        query = { ...relQuery }
+        anchor = relAnchor
+        continue
+      }
+    }
     pathname = `${pathname}/${relPathname}`
     query = { ...query, ...relQuery }
-    if (a) anchor = a
+    if (relAnchor) { anchor = relAnchor }
   }
-  return { pathname: normalizePathname(pathname), query, anchor }
+  return { origin, pathname: normalizePathname(pathname), query, anchor }
+
 }
+
 
 export function buildPath(params: UrlPathParts): string {
   const { pathname, query, anchor } = params
@@ -84,3 +115,27 @@ export function newURL(s: string): URL {
 }
 
 function ensureLeadingHash(s: string): string { return s.startsWith('#') ? s : `#${s}` }
+
+const hierarchicalSchemas = new Set([ 'http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:' ])
+
+function getSchema(s: string): string | null {
+  try {
+    const u = new URL(s + '/x') // append dummy path to avoid errors on origin-only strings
+    return u.protocol
+  } catch {
+    return null
+  }
+}
+
+export function isHierarchicalUrl(s: string): boolean {
+  if (s.startsWith('//')) {
+    return true
+  }
+  const schema = getSchema(s)
+  return schema != null && hierarchicalSchemas.has(schema)
+}
+
+export function isNonHierarchicalUrl(s: string): boolean {
+  const schema = getSchema(s)
+  return schema != null && !hierarchicalSchemas.has(schema)
+}

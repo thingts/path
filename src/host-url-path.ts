@@ -1,7 +1,7 @@
 import * as urt from './url-tools'
 import type { RelativeUrlPath } from './relative-url-path'
+import type { RootUrlPath } from './root-url-path'
 import type { UrlPathParts } from './url-types'
-import { RootUrlPath } from './root-url-path'
 import { UrlPathBase } from './url-path-base'
 
 /**
@@ -28,34 +28,8 @@ export class HostUrlPath extends UrlPathBase {
    * Resolve a relative, root, or host URL against this one.
    */
   resolve(...segments: readonly (string | RelativeUrlPath | RootUrlPath | HostUrlPath | null | undefined)[]): HostUrlPath {
-    let current = new URL(this.toString())
-    for (const s of segments) {
-      if (!s) {
-        continue
-      }
-      const str = String(s)
-      // Reset on new origin
-      if (HostUrlPath.isHostUrlPathString(str)) {
-        current = new URL(str)
-        continue
-      }
-      // Reset on rooted path
-      if (RootUrlPath.isRootUrlPathString(str)) {
-        current = new URL(str, current.origin)
-        continue
-      }
-
-      // Otherwise relative append
-      const { pathname: relSegments, query: relQuery, anchor: relAnchor } = urt.parse(str)
-      current.pathname = [current.pathname.replace(/\/$/, ''), relSegments].filter(Boolean).join('/')
-      const currentQuery = urt.parseQuery(current.search)
-      const mergedQuery = { ...currentQuery, ...relQuery }
-      current.search = urt.queryToString(mergedQuery)
-      if (relAnchor) {
-        current.hash = `#${relAnchor}`
-      } 
-    }
-    return new HostUrlPath(current)
+    const { origin, ...parts } = urt.joinOrResolve(this, segments, { mode: 'resolve', baseOrigin: this.origin_ })
+    return new HostUrlPath(`${origin}${urt.buildPath(parts)}`)
   }
 
 
@@ -73,7 +47,7 @@ export class HostUrlPath extends UrlPathBase {
   }
 
   static isHostUrlPathString(s: string): boolean {
-    return /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(s)
+    return urt.isHierarchicalUrl(s)
   }
 
   protected override cloneWithParts(params: Partial<UrlPathParts>): this {
