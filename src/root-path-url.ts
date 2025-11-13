@@ -1,6 +1,5 @@
 import * as urt from './url-tools'
-import type { AbsolutePath } from './absolute-path'
-import type { RelativePath } from './relative-path'
+import type { FilenameBase } from './filename-base'
 import type { RelativePathUrl } from './relative-path-url'
 import { UrlBase } from './url-base'
 
@@ -12,24 +11,9 @@ export class RootPathUrl extends UrlBase {
     super(path)
   }
 
-  resolve(...segments: readonly (string | RelativePathUrl | RootPathUrl | RelativePath | AbsolutePath | null | undefined)[]): RootPathUrl {
-    let pathname = this.pathname
-    let query = { ...this.query }
-    let fragment = this.fragment
-    for (const s of segments) {
-      if (!s) continue
-      const { pathname: relPathname, query: relQuery, fragment: relFragment } = urt.parse(String(s))
-      if (relPathname.startsWith('/')) {
-        pathname   = relPathname
-        query  = relQuery ?? {}
-        fragment = relFragment
-      } else {
-        pathname = [pathname.replace(/\/$/, ''), relPathname].filter(Boolean).join('/')
-        query = { ...query, ...relQuery }
-        if (relFragment) fragment = relFragment
-      }
-    }
-    return new RootPathUrl(urt.buildPath({ pathname, query, fragment }))
+  resolve(...segments: readonly (string | RelativePathUrl | RootPathUrl | FilenameBase | null | undefined)[]): RootPathUrl {
+    const parts = urt.joinOrResolve(this.pathParts, segments, { mode: 'resolve' })
+    return new RootPathUrl(urt.buildPath(parts))
   }
 
   static isRootPathUrlString(s: string): boolean {

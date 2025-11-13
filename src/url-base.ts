@@ -26,9 +26,9 @@ export abstract class UrlBase extends PathBase {
 
   get pathname(): string { return this.path_ }
   get query():    QueryParams { return { ...this.query_ } }
-  get fragment():   string | undefined { return this.fragment_ }
+  get fragment(): string | undefined { return this.fragment_ }
 
-  get #pathParts(): UrlPathParts {
+  protected get pathParts(): UrlPathParts {
     return {
       pathname: this.path_,
       query:    this.query_,
@@ -58,7 +58,7 @@ export abstract class UrlBase extends PathBase {
   }
 
   join(...segments: readonly (string | UrlBase | null | undefined)[]): this {
-    const pathParts = urt.joinOrResolve(this.#pathParts, segments, { mode: 'join' })
+    const pathParts = urt.joinOrResolve(this.pathParts, segments, { mode: 'join' })
     return this.cloneWithParts(pathParts)
   }
 
@@ -72,9 +72,9 @@ export abstract class UrlBase extends PathBase {
   protected nextPathString(params: Partial<UrlPathParts>): string {
     const { pathname, query, fragment } = params
     return urt.buildPath({
-      pathname: pathname ?? this.pathname,
-      query:    query ?? this.query,
-      fragment:   fragment ?? this.fragment
+      pathname: pathname ?? this.path_,
+      query:    query    ?? this.query_,
+      fragment: fragment ?? this.fragment_
     })
   }
 
@@ -106,7 +106,7 @@ export abstract class UrlBase extends PathBase {
   /////////////////////////////////////////////////////////////////////////////
 
   toString(): string {
-    return urt.buildPath(this.#pathParts)
+    return urt.buildPath(this.pathParts)
   }
 
 }
