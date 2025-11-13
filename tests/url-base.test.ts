@@ -141,4 +141,26 @@ describe('UrlBase', () => {
     expect(v.fragment).toBe('b')
     expect(String(v)).toBe('/foo#b')
   })
+
+  describe('pathname manipulation', () => {
+
+    it('extracts filename', () => {
+      const u = new TestUrlPath('/path/to/file.txt')
+      expect(u.filename.toString()).toBe('file.txt')
+    })
+
+    it('modifies filename, maintains decoration', () => {
+      const u = new TestUrlPath('/path/to/file.txt?a=1#frag')
+      const v = u.replaceExtension('.jpg')
+      expect(v.toString()).toBe('/path/to/file.jpg?a=1#frag')
+    })
+
+    it('gets parent path, maintains decoration', () => {
+      const u = new TestUrlPath('/path/to/file.txt?a=1#frag')
+      const parent = u.parent
+      expect(parent.toString()).toBe('/path/to?a=1#frag')
+    })
+
+  })
+
 })

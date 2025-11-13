@@ -3,6 +3,7 @@ import type { FilenameBase } from './filename-base'
 import { FullPathUrl } from './full-path-url'
 import { RelativePathUrl } from './relative-path-url'
 import { RootPathUrl } from './root-path-url'
+import { UrlBase } from './url-base'
 
 /**
  * Generic constructor for URL path objects.
@@ -17,7 +18,11 @@ import { RootPathUrl } from './root-path-url'
  * pathUrl('foo/bar')           → RelativePathUrl
  * ```
  */
-export function pathUrl(path: string | FilenameBase): FullPathUrl | RootPathUrl | RelativePathUrl {
+export function pathUrl(path: string | FilenameBase | UrlBase): FullPathUrl | RootPathUrl | RelativePathUrl {
+
+  if (path instanceof UrlBase) {
+    return path
+  }
 
   const s = String(path)
 

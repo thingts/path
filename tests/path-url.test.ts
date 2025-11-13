@@ -24,4 +24,10 @@ describe('pathUrl', () => {
   it('throws error for non-hierarchical URLs', () => {
     expect(() => pathUrl('mailto:user@example.com')).toThrowError(/non-hierarchical/i)
   })
+
+  it('returns input if already a UrlBase', () => {
+    const u1 = pathUrl('https://example.com/foo')
+    const u2 = pathUrl(u1)
+    expect(u2).toBe(u1)
+  })     
 })
