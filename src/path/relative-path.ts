@@ -1,4 +1,4 @@
-import * as path from './path-tools'
+import { pth } from '../tools'
 import { PathBase } from './path-base'
 
 /**
@@ -43,7 +43,7 @@ export class RelativePath extends PathBase {
     if (!RelativePath.isRelativePathString(relpath)) {
       throw new Error(`Path must be relative, not absolute: "${relpath}"`)
     }
-    this.path_ = path.normalize(relpath)
+    this.path_ = pth.normalize(relpath)
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ export class RelativePath extends PathBase {
    * @returns True if the string is an absolute path, otherwise false.
    */
   static isRelativePathString(filepath: string): boolean {
-    return !path.isAbsolute(filepath)
+    return !pth.isAbsolute(filepath)
   }
 
 }

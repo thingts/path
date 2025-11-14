@@ -1,5 +1,5 @@
-import * as path from './path-tools'
-import { FilenameBase } from './filename-base'
+import { FilenameBase } from '../core'
+import { fnt } from '../tools'
 
 /**
  * Represents a filename, without any path components, an provides methods
@@ -69,7 +69,7 @@ export class Filename extends FilenameBase {
    * contain any path separators)
    */
   static isFilenameString(filename: string): boolean {
-    return filename === path.basename(filename)
+    return filename === fnt.basename(filename)
   }
 
   /////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
-import * as path from './path-tools'
-import { FilenameBase } from './filename-base'
-import { Filename } from './filename'
+import { Filename } from '../filename'
+import { FilenameBase } from '../core'
+import { fnt, pth } from '../tools'
 
 export abstract class PathBase extends FilenameBase {
 
@@ -52,7 +52,7 @@ export abstract class PathBase extends FilenameBase {
    * ```
    */
   get parent(): this {
-    return this.cloneWithPath(path.dirname(this.path_))
+    return this.cloneWithPath(pth.dirname(this.path_))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ export abstract class PathBase extends FilenameBase {
    * ```
    */
   join(...segments: readonly (string | null | undefined | FilenameBase)[]): this {
-    return this.cloneWithPath((path.join(this.path_, ...segments.filter(s => s !== null && s !== undefined).map(s => String(s)))))
+    return this.cloneWithPath((pth.join(this.path_, ...segments.filter(s => s !== null && s !== undefined).map(s => String(s)))))
   }
 
   /**
@@ -152,7 +152,7 @@ export abstract class PathBase extends FilenameBase {
    * ```
    */
   replaceParent(newParent: string | PathBase): this {
-    return this.cloneWithPath(path.join(String(newParent), this.filename_))
+    return this.cloneWithPath(pth.join(String(newParent), this.filename_))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -167,6 +167,6 @@ export abstract class PathBase extends FilenameBase {
   /** Returns true if this path equals the other path or string */
   equals(other: string | PathBase): boolean                 { return this.path_ === this.cloneWithPath(String(other)).path_ }
 
-  protected get filename_(): string                         { return path.basename(this.path_) }
+  protected get filename_(): string                       { return fnt.basename(this.path_) }
   protected withFilename(filename: string|Filename): this { return this.parent.join(filename) }
 }

@@ -1,7 +1,7 @@
-import * as urt from './url-tools'
-import type { FilenameBase } from './filename-base'
+import type { FilenameBase } from '../core'
 import type { RelativePathUrl } from './relative-path-url'
 import { UrlBase } from './url-base'
+import { urt } from '../tools'
 
 export class RootPathUrl extends UrlBase {
   constructor(path: string) {

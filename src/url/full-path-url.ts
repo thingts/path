@@ -1,9 +1,9 @@
-import * as urt from './url-tools'
-import type { FilenameBase } from './filename-base'
+import type { FilenameBase } from '../core'
 import type { RelativePathUrl } from './relative-path-url'
 import type { RootPathUrl } from './root-path-url'
 import type { UrlPathParts } from './url-types'
 import { UrlBase } from './url-base'
+import { urt } from '../tools'
 
 /**
  * Fully qualified URL with origin, pathname, query, and fragment.

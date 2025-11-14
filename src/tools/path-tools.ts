@@ -1,39 +1,21 @@
 // A minimal implementation of Node.js path module for non-node
 // environments.  
-//
-// Only POSIX-style paths are supported.   Only implements the functions
-// needed by this library
+import { PATH_SEPARATOR } from '../core'
 
-const SEPARATOR = '/'
-
-export const sep = SEPARATOR
-
-export function extname(filename: string): string {
-  const dot = filename.lastIndexOf('.')
-  const sep = filename.lastIndexOf(SEPARATOR)
-  return (dot > 0 && dot > sep) ? filename.slice(dot) : ''
-}
-
-export function basename(filename: string, ext?: string): string {
-  const base = filename.slice(filename.lastIndexOf(SEPARATOR) + 1)
-  if (ext && base.endsWith(ext)) {
-    return base.slice(0, base.length - ext.length)
-  }
-  return base
-}
+export const sep = PATH_SEPARATOR
 
 export function dirname(p: string): string {
   if (p.length === 0) { return '.' }
 
   // Strip trailing slashes (but not if the entire string is '/')
-  while (p.length > 1 && p.endsWith(SEPARATOR)) {
+  while (p.length > 1 && p.endsWith(PATH_SEPARATOR)) {
     p = p.slice(0, -1)
   }
 
-  const idx = p.lastIndexOf(SEPARATOR)
+  const idx = p.lastIndexOf(PATH_SEPARATOR)
 
   if (idx === -1) return '.'        // No slash = current directory
-  if (idx === 0)  return SEPARATOR  // Slash is at the start = root
+  if (idx === 0)  return PATH_SEPARATOR  // Slash is at the start = root
   return p.slice(0, idx)
 }
 
@@ -46,14 +28,14 @@ function joinOrResolve(segments: readonly (string | null | undefined)[], mode: '
 
   for (let i = filtered.length - 1; i >= 0; i--) {
     const segment = filtered[i]
-    resolvedParts.unshift(...segment.split(SEPARATOR))
-    if (mode === 'resolve' && segment.startsWith(SEPARATOR)) {
+    resolvedParts.unshift(...segment.split(PATH_SEPARATOR))
+    if (mode === 'resolve' && segment.startsWith(PATH_SEPARATOR)) {
       firstSegment = segment
       break
     }
   }
 
-  return (firstSegment?.startsWith(SEPARATOR) ? SEPARATOR : '') + normalizeSegments(resolvedParts)
+  return (firstSegment?.startsWith(PATH_SEPARATOR) ? PATH_SEPARATOR : '') + normalizeSegments(resolvedParts)
 }
 
 function normalizeSegments(segments: readonly string[]): string {
@@ -66,7 +48,7 @@ function normalizeSegments(segments: readonly string[]): string {
       normalized.push(segment)
     }
   }
-  return normalized.join(SEPARATOR)
+  return normalized.join(PATH_SEPARATOR)
 }
 
 
@@ -90,20 +72,20 @@ export function join(...segments: readonly (string | null | undefined)[]): strin
 // * Empty path is normalized to '.'
 //
 export function normalize(p: string): string {
-  const leadingDot = '.' + SEPARATOR
-  let normalized = normalizeSegments(p.split(SEPARATOR))
-  if (isAbsolute(p)) { normalized = SEPARATOR + normalized }
+  const leadingDot = '.' + PATH_SEPARATOR
+  let normalized = normalizeSegments(p.split(PATH_SEPARATOR))
+  if (isAbsolute(p)) { normalized = PATH_SEPARATOR + normalized }
   if (normalized.startsWith(leadingDot)) { normalized = normalized.slice(leadingDot.length) }
-  if (normalized === SEPARATOR) { return normalized } // root
-  if (normalized.endsWith(SEPARATOR)) { normalized = normalized.slice(0, -SEPARATOR.length) }
+  if (normalized === PATH_SEPARATOR) { return normalized } // root
+  if (normalized.endsWith(PATH_SEPARATOR)) { normalized = normalized.slice(0, -PATH_SEPARATOR.length) }
   if (normalized === '') { normalized = '.' }
   return normalized
 }
 
 
 export function relative(from: string, to: string): string {
-  const fromParts = resolve(from).split(SEPARATOR).filter(Boolean)
-  const toParts   = resolve(to).split(SEPARATOR).filter(Boolean)
+  const fromParts = resolve(from).split(PATH_SEPARATOR).filter(Boolean)
+  const toParts   = resolve(to).split(PATH_SEPARATOR).filter(Boolean)
 
   // Find common path prefix
   let i = 0
@@ -121,5 +103,5 @@ export function relative(from: string, to: string): string {
 }
 
 export function isAbsolute(p: string): boolean {
-  return p.startsWith(SEPARATOR)
+  return p.startsWith(PATH_SEPARATOR)
 }

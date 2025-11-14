@@ -1,9 +1,9 @@
-import * as urt from './url-tools'
-import type { FilenameBase } from './filename-base'
+import type { FilenameBase } from '../core'
 import { FullPathUrl } from './full-path-url'
 import { RelativePathUrl } from './relative-path-url'
 import { RootPathUrl } from './root-path-url'
 import { UrlBase } from './url-base'
+import { urt } from '../tools'
 
 /**
  * Generic constructor for URL path objects.
@@ -18,10 +18,14 @@ import { UrlBase } from './url-base'
  * pathUrl('foo/bar')           → RelativePathUrl
  * ```
  */
-export function pathUrl(path: string | FilenameBase | UrlBase): FullPathUrl | RootPathUrl | RelativePathUrl {
+export function pathUrl(path: string | URL | FilenameBase | UrlBase): FullPathUrl | RootPathUrl | RelativePathUrl {
 
   if (path instanceof UrlBase) {
     return path
+  }
+
+  if (path instanceof URL) {
+    return pathUrl(path.href)
   }
 
   const s = String(path)

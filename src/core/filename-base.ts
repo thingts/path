@@ -1,4 +1,4 @@
-import * as path from './path-tools'
+import { fnt } from '../tools'
 
 export abstract class FilenameBase {
   /** @private */
@@ -30,7 +30,7 @@ export abstract class FilenameBase {
    * extension `''` and `.gitignore.bak` has extension `.bak`
    */
   get extension(): string {
-    return path.extname(this.filename_)
+    return fnt.extname(this.filename_)
   }
 
   /**
@@ -43,7 +43,7 @@ export abstract class FilenameBase {
    */
 
   get stem(): string {
-    return path.basename(this.filename_, this.extension)
+    return fnt.basename(this.filename_, this.extension)
   }
 
   /////////////////////////////////////////////////////////////////////////////

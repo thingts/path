@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { UrlBase } from '../src/url-base'
+import { UrlBase } from '../src/url/url-base'
 
 class TestUrlPath extends UrlBase {
 }

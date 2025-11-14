@@ -1,5 +1,5 @@
-import * as pathTools from './path-tools'
-import type { QueryParams, UrlPathParts } from './url-types'
+import type { QueryParams, UrlPathParts } from '../url'
+import { pth } from '../tools'
 
 export function parseQuery(q: string): QueryParams {
   const result: QueryParams = {}
@@ -48,7 +48,7 @@ export function queryToString(q: QueryParams): string {
 }
 
 export function normalizePathname(path: string): string {
-  const pathNormalized = pathTools.normalize(path)
+  const pathNormalized = pth.normalize(path)
   if (pathNormalized === '.') return ''
   return(encodeURI(pathNormalized).replace(/[?#]/g, encodeURIComponent)).replace(/%25/g, '%') // double-encoded % -> single-encoded
 }

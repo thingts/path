@@ -1,7 +1,7 @@
-import * as path from './path-tools'
-import type { Filename } from './filename'
-import { RelativePath } from './relative-path'
+import type { Filename } from '../filename'
 import { PathBase } from './path-base'
+import { RelativePath } from './relative-path'
+import { pth } from '../tools'
 
 /**
  * Represents an absolute filesystem path (i.e. a path starting at the root, i.e.
@@ -57,7 +57,7 @@ export class AbsolutePath extends PathBase {
   }
 
   static #canonicalize(p: string): string {
-    return path.normalize(path.resolve(p))
+    return pth.normalize(pth.resolve(p))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ export class AbsolutePath extends PathBase {
    * ```
    */
   resolve(...segments: readonly (string | Filename | RelativePath | AbsolutePath | null | undefined)[]): this {
-    return this.cloneWithPath(path.resolve(this.path_, ...segments.filter(s => s != null).map(s => String(s))))
+    return this.cloneWithPath(pth.resolve(this.path_, ...segments.filter(s => s != null).map(s => String(s))))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ export class AbsolutePath extends PathBase {
    * ```
    */
   relativeTo(base: AbsolutePath): RelativePath {
-    return new RelativePath(path.relative(base.path_, this.path_))
+    return new RelativePath(pth.relative(base.path_, this.path_))
   }
 
   /**
@@ -131,12 +131,12 @@ export class AbsolutePath extends PathBase {
    */
   descendsFrom(ancestor: AbsolutePath | string, opts?: { includeSelf?: boolean }): boolean {
     const { includeSelf = false } = opts ?? {}
-    const ancestorPath = path.resolve(String(ancestor))
+    const ancestorPath = pth.resolve(String(ancestor))
     const current      = this.path_
     if (includeSelf && current === ancestorPath) {
       return true
     }
-    return current.startsWith(ancestorPath + path.sep)
+    return current.startsWith(ancestorPath + pth.sep)
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ export class AbsolutePath extends PathBase {
    * @returns True if the string is an absolute path, otherwise false.
    */
   static isAbsolutePathString(filepath: string): boolean {
-    return path.isAbsolute(filepath)
+    return pth.isAbsolute(filepath)
   }
 
 }

@@ -1,7 +1,7 @@
-import * as urt from './url-tools'
-import type { FilenameBase } from './filename-base'
+import type { FilenameBase } from '../core'
 import type { QueryParams, UrlPathParts } from './url-types'
-import { PathBase } from './path-base'
+import { PathBase } from '../path/path-base'
+import { urt } from '../tools'
 
 /**
  * Base class for all URL-style path types.
