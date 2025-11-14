@@ -1,6 +1,8 @@
 import { pth } from '../tools'
 import { PathBase } from './path-base'
 
+type Joinable = RelativePath
+
 /**
  * Represents a relative filesystem path (i.e. a path that doesn't start at
  * the root, i.e. doesn't have a leading separator) and is not, and provides
@@ -18,7 +20,7 @@ import { PathBase } from './path-base'
  * ```
  *
  */
-export class RelativePath extends PathBase {
+export class RelativePath extends PathBase<Joinable> {
 
   protected path_: string
 

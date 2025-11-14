@@ -1,7 +1,10 @@
-import type { Filename } from '../filename'
+import type { AbsolutePathOps, JoinableBasic } from '../core'
 import { PathBase } from './path-base'
 import { RelativePath } from './relative-path'
 import { pth } from '../tools'
+
+type Joinable = RelativePath
+type Resolveable = AbsolutePath
 
 /**
  * Represents an absolute filesystem path (i.e. a path starting at the root, i.e.
@@ -29,7 +32,7 @@ import { pth } from '../tools'
  * ```
  *
  */
-export class AbsolutePath extends PathBase {
+export class AbsolutePath extends PathBase<Joinable> implements AbsolutePathOps<Resolveable, Joinable> {
   protected readonly path_: string
 
   /**
@@ -67,12 +70,12 @@ export class AbsolutePath extends PathBase {
   /////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Resolve additional path segments against this absolute path.
+   * Resolve additional path arguments against this absolute path.
    *
    * Accepts strings, {@link Filename}, {@link RelativePath}, or {@link AbsolutePath} objects.
    * Null and undefined segments are ignored.
    *
-   * Similar to join, except that if any segment is an {@link AbsolutePath} or string
+   * Similar to join, except that if any argument is an {@link AbsolutePath} or string
    * starting with a path separator, the current path is discarded and
    * resolution starts from that segment.
    *
@@ -85,8 +88,8 @@ export class AbsolutePath extends PathBase {
    * const p3 = p1.resolve('/etc/config') // '/etc/config' (resets to absolute path)
    * ```
    */
-  resolve(...segments: readonly (string | Filename | RelativePath | AbsolutePath | null | undefined)[]): this {
-    return this.cloneWithPath(pth.resolve(this.path_, ...segments.filter(s => s != null).map(s => String(s))))
+  resolve(...args: readonly (JoinableBasic | Joinable | Resolveable)[]): this {
+    return this.cloneWithPath(pth.resolve(this.path_, ...args.filter(Boolean).map(String)))
   }
 
   /////////////////////////////////////////////////////////////////////////////

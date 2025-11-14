@@ -18,7 +18,7 @@ import { urt } from '../tools'
  * pathUrl('foo/bar')           → RelativePathUrl
  * ```
  */
-export function pathUrl(path: string | URL | FilenameBase | UrlBase): FullPathUrl | RootPathUrl | RelativePathUrl {
+export function pathUrl(path: string | URL | FilenameBase | UrlBase<unknown>): FullPathUrl | RootPathUrl | RelativePathUrl {
 
   if (path instanceof UrlBase) {
     return path

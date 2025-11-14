@@ -1,29 +1,8 @@
-import type { PathOps, JoinableBasic } from '../core'
-import { Filename } from '../filename'
-import { FilenameBase } from '../core'
-import { fnt, pth } from '../tools'
+import type { Filename } from '../filename'
 
-export abstract class PathBase<TJoinable> extends FilenameBase implements PathOps<TJoinable> {
+export type JoinableBasic = string | Filename | null | undefined
 
-  /** @hidden Implemented by subclasses to hold the normalized path string. */
-  protected abstract path_: string
-
-  /**
-   * Protected factory to construct a new instance of the current class, with
-   * the given path.
-   * 
-   * Used by all mutation-like methods to return a new instance of the same
-   * class, allowing derived classes that inherit those methods to return new
-   * instances of themselves without needing to override them.
-   *
-   * The default implementation assumes the derived class's constructor takes
-   * a single string argument (the path).  Derived classes with different
-   * constructor siguatures should override {@link cloneWithPath}.
-   */
-  protected cloneWithPath(path: string | FilenameBase): this {
-    const ctor = this.constructor as new(path: string) => this
-    return new ctor(String(path))
-  }
+export interface PathOps<TJoinable = never> {
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -40,7 +19,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * new RelativePath('a/b/c.txt').filename  // 'c.txt' (Filename)
    * ```
    */
-  get filename(): Filename { return new Filename(this.filename_) }
+  get filename(): Filename
 
   /**
    * The parent directory of this path.
@@ -52,9 +31,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * new RelativePath('a/b/c.txt').parent  // 'a/b' (RelativePath)
    * ```
    */
-  get parent(): this {
-    return this.cloneWithPath(pth.dirname(this.path_))
-  }
+  get parent(): this
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -66,8 +43,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
   /**
    * Join additional path segments to this path.
    *
-   * Accepts strings or path objects; `null` and `undefined` are ignored.
-   * The resulting path is normalized.
+   * Accepts strings, filenames, or path objects; `null` and `undefined` are accepted and ignored.
    *
    * @returns A new path instance with the segments appended
    *
@@ -82,18 +58,14 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * r2 instanceof RelativePath // true
    * ```
    */
-  join(...segments: readonly (JoinableBasic | TJoinable)[]): this {
-    return this.cloneWithPath((pth.join(this.path_, ...segments.filter(Boolean).map(String))))
-  }
+  join(...segments: readonly (JoinableBasic | TJoinable)[]): this 
 
   /**
    * Replace the filename (last segment).
    *
    * @returns A new path with the filename replaced.
    */
-  replaceFilename(newFilename: string | Filename): this {
-    return this.cloneWithFilename(String(newFilename))
-  }
+  replaceFilename(newFilename: string | Filename): this
 
  /**
    * Replace the filename stem, keeping the extension the same
@@ -106,9 +78,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * new RelativePath('a/b/c.txt').replaceStem('d')  // 'a/b/d.txt' (RelativePath)
    * ```
    */
-  replaceStem(newStem: string): this {
-    return this.cloneWithFilename(this.filename.replaceStem(newStem))
-  }
+  replaceStem(newStem: string): this 
 
   /**
    * Replace the filename extension, keeping the stem the same.  The passed
@@ -122,9 +92,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * new RelativePath('a/b/c.txt').replaceExtension('.json') // '/a/b/c.json' (RelativePath)
    * ```
    */
-  replaceExtension(newExt: string): this {
-    return this.cloneWithFilename(this.filename.replaceExtension(newExt))
-  }
+  replaceExtension(newExt: string): this
 
   /**
    * Transform the filename via a callback.
@@ -137,9 +105,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * p.transformFilename(f => String(f).toUpperCase())
    * ```
    */
-  transformFilename(fn: (filename: Filename) => string | Filename): this {
-    return this.cloneWithFilename(fn(this.filename))
-  }
+  transformFilename(fn: (filename: Filename) => string | Filename): this
 
   /**
    * Replace the parent directory while keeping the current filename.
@@ -152,22 +118,7 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * new RelativePath('old/file.txt').replaceParent('new/dir')   // 'new/dir/file.txt' (RelativePath)
    * ```
    */
-  replaceParent(newParent: string | this): this {
-    return this.cloneWithPath(pth.join(String(newParent), this.filename_))
-  }
+  replaceParent(newParent: string | this): this
 
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  // --- FilenameBase abstract method implemenations ---
-  //
-  /////////////////////////////////////////////////////////////////////////////
-
-  /** Returns the path as string. */
-  toString(): string                                        { return this.path_ }
-
-  /** Returns true if this path equals the other path or string */
-  equals(other: string | this): boolean                   { return this.path_ === this.cloneWithPath(String(other)).path_ }
-
-  protected get filename_(): string                       { return fnt.basename(this.path_) }
-  protected cloneWithFilename(filename: string|Filename): this { return this.parent.join(filename) }
 }
+

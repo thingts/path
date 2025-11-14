@@ -1,7 +1,7 @@
 import type { QueryParams, UrlPathParts } from '../url'
 import { pth } from '../tools'
 
-export function parseQuery(q: string): QueryParams {
+function parseQuery(q: string): QueryParams {
   const result: QueryParams = {}
   const str = q.startsWith('?') ? q.slice(1) : q
   for (const pair of str.split('&')) {
@@ -38,7 +38,7 @@ export function parse(s: string): UrlPathParts {
 
 
 // Converts a query object back to a query string.  Canonicalizes by sorting keys.
-export function queryToString(q: QueryParams): string {
+function queryToString(q: QueryParams): string {
   const entries = Object.entries(q).flatMap(([k, v]) =>
     Array.isArray(v) ? v.map(x => [k, x]) : [[k, v]]
   )
@@ -47,15 +47,15 @@ export function queryToString(q: QueryParams): string {
   return '?' + entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')
 }
 
-export function normalizePathname(path: string): string {
+function normalizePathname(path: string): string {
   const pathNormalized = pth.normalize(path)
   if (pathNormalized === '.') return ''
   return(encodeURI(pathNormalized).replace(/[?#]/g, encodeURIComponent)).replace(/%25/g, '%') // double-encoded % -> single-encoded
 }
 
-export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[], opts: { mode: 'join' | 'resolve' }): UrlPathParts
-export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin: string}): UrlPathParts & { origin: string }
-export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString: () => string } | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin?: string}): UrlPathParts & { origin?: string } {
+export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve' }): UrlPathParts
+export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin: string}): UrlPathParts & { origin: string }
+export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin?: string}): UrlPathParts & { origin?: string } {
   const { mode, baseOrigin } = opts
   const isResolve = mode === 'resolve'
   const detectOrigin = isResolve && (baseOrigin !== undefined)
@@ -63,11 +63,10 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly ({ toString:
   let pathname = cur.pathname
   let query    = { ...cur.query }
   let fragment   = cur.fragment
-  for (const s of segments) {
+  for (let str of segments) {
     let relOrigin: string | undefined = undefined
 
-    if (!s) { continue }
-    let str = s.toString()
+    if (!str) { continue }
 
     const isHierarchical = isHierarchicalUrl(str)
     const isNonHierarchical = isNonHierarchicalUrl(str)

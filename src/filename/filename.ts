@@ -55,7 +55,7 @@ export class Filename extends FilenameBase {
    * @returns A new {@link Filename} instance
    */
   transform(fn: (filename: string) => string): this {
-    return this.withFilename(fn(this.filename_))
+    return this.cloneWithFilename(fn(this.filename_))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -81,5 +81,5 @@ export class Filename extends FilenameBase {
   override toString(): string                             { return this.filename_ }
 
   override equals(other: string | Filename): boolean      { return this.filename_ === String(other) }
-  protected override withFilename(filename: string): this { return new Filename(filename) as this }
+  protected override cloneWithFilename(filename: string): this { return new Filename(filename) as this }
 }

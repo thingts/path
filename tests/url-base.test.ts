@@ -1,7 +1,10 @@
-import { describe, it, expect } from 'vitest'
 import { UrlBase } from '../src/url/url-base'
+import { describe, it, expect } from 'vitest'
 
-class TestUrlPath extends UrlBase {
+class TestUrlPath extends UrlBase<TestUrlPath> {
+  protected construct(url: string): TestUrlPath {
+    return new TestUrlPath(url)
+  }
 }
 
 describe('UrlBase', () => {

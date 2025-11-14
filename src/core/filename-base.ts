@@ -7,7 +7,7 @@ export abstract class FilenameBase {
   protected abstract filename_: string
 
   /** @hidden Implemented by subclasses to create a new instance with the given filename. */
-  protected abstract withFilename(filename: string): this
+  protected abstract cloneWithFilename(filename: string): this
 
   /** Returns the filename as a string. */
   abstract toString(): string
@@ -63,7 +63,7 @@ export abstract class FilenameBase {
    * ```
    */
   replaceStem(newStem: string): this {
-    return this.withFilename(newStem + this.extension)
+    return this.cloneWithFilename(newStem + this.extension)
   }
 
   /**
@@ -78,7 +78,7 @@ export abstract class FilenameBase {
    */
   replaceExtension(newExt: string): this {
     const ext = newExt.startsWith('.') ? newExt : '.' + newExt
-    return this.withFilename(this.stem + ext)
+    return this.cloneWithFilename(this.stem + ext)
   }
 
 }
