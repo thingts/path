@@ -1,4 +1,4 @@
-import { FilenameBase } from '../core'
+import type { FilenameOps } from '../core'
 import { fnt } from '../tools'
 
 /**
@@ -18,8 +18,8 @@ import { fnt } from '../tools'
  * ```
  */
 
-export class Filename extends FilenameBase {
-  protected filename_: string
+export class Filename implements FilenameOps {
+  #filename: string
 
   /**
    * Create a {@link Filename} instance from a string or another {@link Filename}
@@ -33,13 +33,22 @@ export class Filename extends FilenameBase {
    * ```
    */
   constructor(filename: string | Filename) {
-    super()
     filename = String(filename)
     if (!Filename.isFilenameString(filename)) {
       throw new Error(`Filename must not contain path components: "${filename}"`)
     }
-    this.filename_ = filename
+    this.#filename = filename
   }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // --- FilenameOps interface implementations ---
+  /////////////////////////////////////////////////////////////////////////////
+
+  get extension(): string { return fnt.extname(this.#filename) }
+  get stem(): string      { return fnt.basename(this.#filename, this.extension) }
+
+  replaceStem(newStem: string): this     { return new Filename(newStem + this.extension) as this }
+  replaceExtension(newExt: string): this { return new Filename(this.stem + fnt.ensureLeadingDot(newExt)) as this }
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -54,8 +63,8 @@ export class Filename extends FilenameBase {
    *
    * @returns A new {@link Filename} instance
    */
-  transform(fn: (filename: string) => string): this {
-    return this.cloneWithFilename(fn(this.filename_))
+  transform(fn: (filename: string) => string): Filename {
+    return new Filename(fn(this.#filename))
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -74,12 +83,10 @@ export class Filename extends FilenameBase {
 
   /////////////////////////////////////////////////////////////////////////////
   //
-  // --- FilenameBase abstract method implementations ---
+  // Utilities
   //
   /////////////////////////////////////////////////////////////////////////////
 
-  override toString(): string                             { return this.filename_ }
-
-  override equals(other: string | Filename): boolean      { return this.filename_ === String(other) }
-  protected override cloneWithFilename(filename: string): this { return new Filename(filename) as this }
+  toString(): string                             { return this.#filename }
+  equals(other: string | Filename): boolean      { return this.#filename === String(other) }
 }

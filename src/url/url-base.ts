@@ -1,39 +1,37 @@
-import type { PathOps, JoinableBasic } from '../core'
+import type { FilenameOps, PathOps, JoinableBasic } from '../core'
 import type { QueryParams, UrlPathParts } from './url-types'
 import { Filename } from '../filename'
-import { FilenameBase } from '../core'
 import { fnt, pth, urt } from '../tools'
 
 /**
  * Base class for all URL-style path types.
  * Provides query + fragment handling and immutable join/resolve utilities.
  */
-export abstract class UrlBase<TJoinable> extends FilenameBase implements PathOps<TJoinable> {
-  protected pathname_: string
-  protected readonly query_?: QueryParams
-  protected readonly fragment_?: string
+export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
+  readonly #pathname: string
+  readonly #query?: QueryParams
+  readonly #fragment?: string
 
   constructor(path: string) {
-    super()
     const { pathname, query, fragment } = urt.parse(path)
-    this.pathname_ = pathname
-    this.query_    = query
-    this.fragment_ = fragment
+    this.#pathname = pathname
+    this.#query    = query
+    this.#fragment = fragment
   }
 
   /////////////////////////////////////////////////////////////////////////////
   // --- Accessors ------------------------------------------------------------
   /////////////////////////////////////////////////////////////////////////////
 
-  get pathname(): string { return this.pathname_ }
-  get query():    QueryParams { return { ...this.query_ } }
-  get fragment(): string | undefined { return this.fragment_ }
+  get pathname(): string { return this.#pathname }
+  get query():    QueryParams { return { ...this.#query } }
+  get fragment(): string | undefined { return this.#fragment }
 
   protected get pathParts(): UrlPathParts {
     return {
-      pathname: this.pathname_,
-      query:    this.query_,
-      fragment:   this.fragment_,
+      pathname: this.#pathname,
+      query:    this.#query,
+      fragment:   this.#fragment,
     }
   }
 
@@ -41,8 +39,10 @@ export abstract class UrlBase<TJoinable> extends FilenameBase implements PathOps
   // --- PathOps implementation -----------------------------------------------
   /////////////////////////////////////////////////////////////////////////////
 
+  get stem(): string       { return this.filename.stem }
+  get extension(): string  { return this.filename.extension }
   get filename(): Filename { return new Filename(this.filename_) }
-  get parent(): this       { return this.cloneWithPathname(pth.dirname(this.pathname_)) }
+  get parent(): this       { return this.cloneWithPathname(pth.dirname(this.#pathname)) }
 
   replaceExtension(newExtension: string): this                           { return this.cloneWithFilename(this.filename.replaceExtension(newExtension)) }
   replaceFilename(newFilename: string | Filename): this                  { return this.cloneWithFilename(String(newFilename)) }
@@ -59,7 +59,7 @@ export abstract class UrlBase<TJoinable> extends FilenameBase implements PathOps
   // --- Mutation-like (immutable) operations ---------------------------------
   /////////////////////////////////////////////////////////////////////////////
 
-  replacePathname(path: string | FilenameBase): this {
+  replacePathname(path: string | FilenameOps): this {
     return this.cloneWithParts({ pathname: String(path) })
   }
 
@@ -68,7 +68,7 @@ export abstract class UrlBase<TJoinable> extends FilenameBase implements PathOps
   }
 
   mergeQuery(query: QueryParams): this {
-    const merged: QueryParams = { ...this.query_, ...query }
+    const merged: QueryParams = { ...this.#query, ...query }
     return this.cloneWithParts({ query: merged })
   }
 
@@ -87,9 +87,9 @@ export abstract class UrlBase<TJoinable> extends FilenameBase implements PathOps
   protected nextPathString(params: Partial<UrlPathParts>): string {
     const { pathname, query, fragment } = params
     return urt.buildPath({
-      pathname: pathname ?? this.pathname_,
-      query:    query    ?? this.query_,
-      fragment: fragment ?? this.fragment_
+      pathname: pathname ?? this.#pathname,
+      query:    query    ?? this.#query,
+      fragment: fragment ?? this.#fragment
     })
   }
 
@@ -129,7 +129,7 @@ export abstract class UrlBase<TJoinable> extends FilenameBase implements PathOps
    */
   equals(other: string | this): boolean                   { return this.toString() === this.cloneWithUrlString(String(other)).toString() }
 
-  protected get filename_(): string                       { return fnt.basename(this.pathname_) }
+  protected get filename_(): string                       { return fnt.basename(this.#pathname) }
   protected cloneWithFilename(filename: string|Filename): this { return this.parent.join(filename) }
 
   /////////////////////////////////////////////////////////////////////////////

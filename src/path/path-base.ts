@@ -1,9 +1,9 @@
-import type { PathOps, JoinableBasic } from '../core'
+import type { FilenameOps, PathOps, JoinableBasic } from '../core'
 import { Filename } from '../filename'
-import { FilenameBase } from '../core'
 import { fnt, pth } from '../tools'
 
-export abstract class PathBase<TJoinable> extends FilenameBase implements PathOps<TJoinable> {
+export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
+  get #filename(): string { return fnt.basename(this.path_) }
 
   /** @hidden Implemented by subclasses to hold the normalized path string. */
   protected abstract path_: string
@@ -12,162 +12,49 @@ export abstract class PathBase<TJoinable> extends FilenameBase implements PathOp
    * Protected factory to construct a new instance of the current class, with
    * the given path.
    * 
-   * Used by all mutation-like methods to return a new instance of the same
-   * class, allowing derived classes that inherit those methods to return new
-   * instances of themselves without needing to override them.
+   * Used by path mutation-like methods to return a new instance of the same
+   * class, allowing derived classes that inherit those methods to return
+   * new instances of themselves without needing to override them.
    *
    * The default implementation assumes the derived class's constructor takes
    * a single string argument (the path).  Derived classes with different
    * constructor siguatures should override {@link cloneWithPath}.
    */
-  protected cloneWithPath(path: string | FilenameBase): this {
+  protected cloneWithPath(path: string | FilenameOps): this {
     const ctor = this.constructor as new(path: string) => this
-    return new ctor(String(path))
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  //  --- Getters for path properties ---
-  //
-  /////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * The filename component (last path segment) as a {@link Filename}.
-   *
-   * @example
-   * ```ts
-   * new AbsolutePath('/a/b/c.txt').filename // 'c.txt' (Filename)
-   * new RelativePath('a/b/c.txt').filename  // 'c.txt' (Filename)
-   * ```
-   */
-  get filename(): Filename { return new Filename(this.filename_) }
-
-  /**
-   * The parent directory of this path.
-   *
-   * @returns A new path instance pointing to the parent.
-   * @example
-   * ```ts
-   * new AbsolutePath('/a/b/c.txt').parent // '/a/b' (AbsolutePath)
-   * new RelativePath('a/b/c.txt').parent  // 'a/b' (RelativePath)
-   * ```
-   */
-  get parent(): this {
-    return this.cloneWithPath(pth.dirname(this.path_))
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  // --- Path manipulation methods ---
-  //
-  /////////////////////////////////////////////////////////////////////////////
-
-
-  /**
-   * Join additional path segments to this path.
-   *
-   * Accepts strings or path objects; `null` and `undefined` are ignored.
-   * The resulting path is normalized.
-   *
-   * @returns A new path instance with the segments appended
-   *
-   * @example
-   * ```ts
-   * const a1 = new AbsolutePath('/project/demo')
-   * const a2 = a1.join('demo1/src', 'index.js') // '/project/demo/demo1/src/index.js'
-   * a2 instanceof AbsolutePath // true
-   *
-   * const r1 = new RelativePath('demo')
-   * const r2 = r1.join('demo1/src', 'index.js') // 'demo/demo1/src/index.js'
-   * r2 instanceof RelativePath // true
-   * ```
-   */
-  join(...segments: readonly (JoinableBasic | TJoinable)[]): this {
-    return this.cloneWithPath((pth.join(this.path_, ...segments.filter(Boolean).map(String))))
+    return new ctor(path.toString())
   }
 
   /**
-   * Replace the filename (last segment).
+   * Protected factory to construct a new instance of the current class,
+   * with the given filename.
    *
-   * @returns A new path with the filename replaced.
+   * Useed by filename mutation-like methods to return a new instance of
+   * the same class, allowing derived classes that inherit those methods to
+   * return new instances of themselves without needing to override them.
    */
-  replaceFilename(newFilename: string | Filename): this {
-    return this.cloneWithFilename(String(newFilename))
-  }
-
- /**
-   * Replace the filename stem, keeping the extension the same
-   *
-   * @param newStem - New stem to use (extension is preserved).
-   * @returns A new path with the stem replaced.
-   * @example
-   * ```ts
-   * new AbsolutePath('/a/b/c.txt').replaceStem('d') // '/a/b/d.txt' (AbsolutePath)
-   * new RelativePath('a/b/c.txt').replaceStem('d')  // 'a/b/d.txt' (RelativePath)
-   * ```
-   */
-  replaceStem(newStem: string): this {
-    return this.cloneWithFilename(this.filename.replaceStem(newStem))
-  }
-
-  /**
-   * Replace the filename extension, keeping the stem the same.  The passed
-   * can include or omit the leading dot; if omitted, it will be added.
-   *
-   * @param newExt - New extension, e.g. `json` or `.json`
-   * @returns A new path with the extension replaced.
-   * @example
-   * ```ts
-   * new AbsolutePath('/a/b/c.txt').replaceExtension('json') // '/a/b/c.json' (AbsolutePath)
-   * new RelativePath('a/b/c.txt').replaceExtension('.json') // '/a/b/c.json' (RelativePath)
-   * ```
-   */
-  replaceExtension(newExt: string): this {
-    return this.cloneWithFilename(this.filename.replaceExtension(newExt))
-  }
-
-  /**
-   * Transform the filename via a callback.
-   *
-   * @param fn - Receives the current {@link Filename}, returns a new filename
-   *             (string or {@link Filename}).
-   * @returns A new path with the transformed filename.
-   * @example
-   * ```ts
-   * p.transformFilename(f => String(f).toUpperCase())
-   * ```
-   */
-  transformFilename(fn: (filename: Filename) => string | Filename): this {
-    return this.cloneWithFilename(fn(this.filename))
-  }
-
-  /**
-   * Replace the parent directory while keeping the current filename.
-   *
-   * @param newParent - Parent directory as string or another `PathBase`.
-   * @returns A new path rooted at `newParent` with the same filename.
-   * @example
-   * ```ts
-   * new AbsolutePath('/old/file.txt').replaceParent('/new/dir') // '/new/dir/file.txt' (AbsolutePath)
-   * new RelativePath('old/file.txt').replaceParent('new/dir')   // 'new/dir/file.txt' (RelativePath)
-   * ```
-   */
-  replaceParent(newParent: string | this): this {
-    return this.cloneWithPath(pth.join(String(newParent), this.filename_))
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  // --- FilenameBase abstract method implemenations ---
-  //
-  /////////////////////////////////////////////////////////////////////////////
-
-  /** Returns the path as string. */
-  toString(): string                                        { return this.path_ }
-
-  /** Returns true if this path equals the other path or string */
-  equals(other: string | this): boolean                   { return this.path_ === this.cloneWithPath(String(other)).path_ }
-
-  protected get filename_(): string                       { return fnt.basename(this.path_) }
   protected cloneWithFilename(filename: string|Filename): this { return this.parent.join(filename) }
+
+  /////////////////////////////////////////////////////////////////////////////
+  //
+  //  --- PathOps implementation ---
+  //
+  /////////////////////////////////////////////////////////////////////////////
+
+  get stem(): string       { return this.filename.stem }
+  get extension(): string  { return this.filename.extension }
+  get filename(): Filename { return new Filename(this.#filename) }
+  get parent(): this       { return this.cloneWithPath(pth.dirname(this.path_)) }
+
+  replaceStem(newStem: string): this                                     { return this.cloneWithFilename(this.filename.replaceStem(newStem)) }
+  replaceExtension(newExt: string): this                                 { return this.cloneWithFilename(this.filename.replaceExtension(newExt)) }
+  replaceFilename(newFilename: string | Filename): this                  { return this.cloneWithFilename(String(newFilename)) }
+  transformFilename(fn: (filename: Filename) => string | Filename): this { return this.cloneWithFilename(fn(this.filename)) }
+  replaceParent(newParent: string | this): this                          { return this.cloneWithPath(pth.join(String(newParent), this.#filename)) }
+
+  join(...segments: readonly (JoinableBasic | TJoinable)[]): this { return this.cloneWithPath((pth.join(this.path_, ...segments.filter(Boolean).map(String)))) }
+
+  toString(): string                    { return this.path_ }
+  equals(other: string | this): boolean { return this.path_ === this.cloneWithPath(String(other)).path_ }
+
 }

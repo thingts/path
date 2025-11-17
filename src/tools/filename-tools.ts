@@ -13,3 +13,7 @@ export function basename(filename: string, ext?: string): string {
   }
   return base
 }
+
+export function ensureLeadingDot(ext: string): string {
+  return ext.startsWith('.') ? ext : '.' + ext
+}

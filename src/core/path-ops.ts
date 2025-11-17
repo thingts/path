@@ -1,8 +1,9 @@
 import type { Filename } from '../filename'
+import type { FilenameOps } from './filename-ops'
 
 export type JoinableBasic = string | Filename | null | undefined
 
-export interface PathOps<TJoinable = never> {
+export interface PathOps<TJoinable = never> extends FilenameOps {
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -121,4 +122,3 @@ export interface PathOps<TJoinable = never> {
   replaceParent(newParent: string | this): this
 
 }
-

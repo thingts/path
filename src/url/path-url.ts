@@ -1,4 +1,4 @@
-import type { FilenameBase } from '../core'
+import type { FilenameOps } from '../core'
 import { FullPathUrl } from './full-path-url'
 import { RelativePathUrl } from './relative-path-url'
 import { RootPathUrl } from './root-path-url'
@@ -18,7 +18,7 @@ import { urt } from '../tools'
  * pathUrl('foo/bar')           → RelativePathUrl
  * ```
  */
-export function pathUrl(path: string | URL | FilenameBase | UrlBase<unknown>): FullPathUrl | RootPathUrl | RelativePathUrl {
+export function pathUrl(path: string | URL | FilenameOps | UrlBase<unknown>): FullPathUrl | RootPathUrl | RelativePathUrl {
 
   if (path instanceof UrlBase) {
     return path
