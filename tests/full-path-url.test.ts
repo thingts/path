@@ -11,9 +11,30 @@ describe('FullPathUrl', () => {
     expect(u.fragment).toBe('frag')
   })
 
+  it('accepts URL objects', () => {
+    const base = new URL('https://x.com/base/path?b=2#basefrag')
+    const u = new FullPathUrl(base)
+    expect(u.origin).toBe('https://x.com')
+    expect(u.pathname).toBe('/base/path')
+    expect(u.query).toEqual({ b: '2' })
+    expect(u.fragment).toBe('basefrag')
+  })
+  
+  it('accepts scheme-relative URL strings', () => {
+    const u = new FullPathUrl('//x.com/foo/bar?a=1#frag')
+    expect(u.origin).toBe('//x.com')
+    expect(u.pathname).toBe('/foo/bar')
+    expect(u.query).toEqual({ a: '1' })
+    expect(u.fragment).toBe('frag')
+  })
+
   it('throws on invalid URL', () => {
     expect(() => new FullPathUrl('not-a-url')).toThrow(/Invalid URL.*not-a-url/)
     expect(() => new FullPathUrl('http://badc[aracter.com')).toThrow(/Invalid URL/)
+  })
+
+  it('throws on non-hierarchical URL', () => {
+    expect(() => new FullPathUrl('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')).toThrow(/non-hierarchical URL/)
   })
 
   it('join() merges query params and replaces fragment', () => {

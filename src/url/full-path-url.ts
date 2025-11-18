@@ -18,9 +18,16 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   readonly #origin: string
 
   constructor(url: string | URL | FullPathUrl) {
-    const u = (url instanceof URL) ? url : (url instanceof FullPathUrl) ? url.toURL() : urt.newURL(url)
-    super(u.href.slice(u.origin.length))
-    this.#origin = u.origin
+    const str = String(url)
+    const { valid, hierarchical, origin, path } = urt.parseUrl(str)
+    if (!valid) {
+      throw new Error(`Invalid URL: ${String(url)}`)
+    }
+    if (!hierarchical) {
+      throw new Error(`Cannot construct FullPathUrl from non-hierarchical URL: ${str}`)
+    }
+    super(path)
+    this.#origin = origin
   }
 
   /////////////////////////////////////////////////////////////////////////////

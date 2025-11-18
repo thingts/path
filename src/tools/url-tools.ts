@@ -19,7 +19,7 @@ function parseQuery(q: string): QueryParams {
   return result
 }
 
-export function parse(s: string): UrlPathParts {
+export function parsePath(s: string): UrlPathParts {
   const endify       = (x: number): number => (x === -1) ? s.length : x
   const hashIndex    = endify(s.lastIndexOf('#'))
   const queryIndex   = endify(s.lastIndexOf('?'))
@@ -75,7 +75,7 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | nu
       str       = u.href.slice(u.origin.length)
       relOrigin = u.origin
     }
-    const { pathname: relPathname, query: relQuery, fragment: relFragment } = parse(str)
+    const { pathname: relPathname, query: relQuery, fragment: relFragment } = parsePath(str)
 
     if (isResolve) {
       if (detectOrigin && isNonHierarchical) {
@@ -97,7 +97,6 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | nu
 
 }
 
-
 export function buildPath(params: UrlPathParts): string {
   const { pathname, query, fragment } = params
   const fragmentString = fragment ? ensureLeadingHash(fragment) : ''
@@ -105,36 +104,38 @@ export function buildPath(params: UrlPathParts): string {
   return `${pathname}${queryString}${fragmentString}`
 }
 
-export function newURL(s: string): URL {
-  try {
-    return new URL(s)
-  } catch {
-    throw new Error(`Invalid URL: ${s}`)
-  }
-}
-
 function ensureLeadingHash(s: string): string { return s.startsWith('#') ? s : `#${s}` }
 
-const hierarchicalSchemas = new Set([ 'http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:' ])
+const SCHEMA_RELATIVE = Symbol('schema-relative')
 
-function getSchema(s: string): string | null {
-  try {
-    const u = new URL(s + '/x') // append dummy path to avoid errors on origin-only strings
-    return u.protocol
-  } catch {
-    return null
-  }
-}
+const hierarchicalSchemas = new Set([ 'http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:', SCHEMA_RELATIVE ])
 
 export function isHierarchicalUrl(s: string): boolean {
-  if (s.startsWith('//')) {
-    return true
-  }
-  const schema = getSchema(s)
-  return schema != null && hierarchicalSchemas.has(schema)
+  const { valid, hierarchical } = parseUrl(s)
+  return valid && hierarchical
 }
 
 export function isNonHierarchicalUrl(s: string): boolean {
-  const schema = getSchema(s)
-  return schema != null && !hierarchicalSchemas.has(schema)
+  const { valid, hierarchical } = parseUrl(s)
+  return valid && !hierarchical
+}
+
+export function parseUrl(s: string): { valid: true, hierarchical: boolean, origin: string, path: string } | { valid: false, hierarchical: undefined, origin: undefined, path: undefined } {
+  const schemeRelative = s.startsWith('//')
+  try {
+    const u = new URL(`${schemeRelative ? 'http:' : ''}${s}/x`) // append dummy path to avoid errors on origin-only strings
+    return {
+      valid:        true,
+      hierarchical: hierarchicalSchemas.has(u.protocol),
+      origin:       schemeRelative ? `//${u.host}` : u.origin,
+      path:         u.href.slice(u.origin.length).slice(0, -2), // remove dummy path
+    }
+  } catch {
+    return {
+      valid:        false,
+      hierarchical: undefined,
+      origin:       undefined,
+      path:         undefined,
+    }
+  }
 }

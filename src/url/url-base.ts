@@ -13,7 +13,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   readonly #fragment?: string
 
   constructor(path: string) {
-    const { pathname, query, fragment } = urt.parse(path)
+    const { pathname, query, fragment } = urt.parsePath(path)
     this.#pathname = pathname
     this.#query    = query
     this.#fragment = fragment
