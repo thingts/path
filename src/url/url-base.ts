@@ -27,11 +27,12 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   get query():    QueryParams { return { ...this.#query } }
   get fragment(): string | undefined { return this.#fragment }
 
+  /** @hidden */
   protected get pathParts(): UrlPathParts {
     return {
       pathname: this.#pathname,
       query:    this.#query,
-      fragment:   this.#fragment,
+      fragment: this.#fragment,
     }
   }
 

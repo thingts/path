@@ -102,6 +102,15 @@ export function relative(from: string, to: string): string {
   ].join('/') || '.'
 }
 
+export function descendsFrom(ancestor: string, target: string, opts?: { includeSelf?: boolean }): boolean {
+  const { includeSelf = false } = opts ?? {}
+  const relativePath = relative(ancestor, target)
+  if (relativePath === '.' ) {
+    return includeSelf
+  }
+  return !relativePath.startsWith('..')
+}
+
 export function isAbsolute(p: string): boolean {
   return p.startsWith(PATH_SEPARATOR)
 }

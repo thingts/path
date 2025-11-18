@@ -1,59 +1,80 @@
 import type { AbsolutePathOps, JoinableBasic } from '../core'
 import type { RelativePath } from '../path'
-import type { RelativePathUrl } from './relative-path-url'
-import type { RootPathUrl } from './root-path-url'
 import type { UrlPathParts } from './url-types'
+import { RelativePathUrl } from './relative-path-url'
+import { RootPathUrl } from './root-path-url'
 import { UrlBase } from './url-base'
-import { urt } from '../tools'
+import { pth, urt } from '../tools'
 
-type Joinable    = RelativePathUrl | RelativePath
-type Resolveable = RootPathUrl | FullPathUrl
+type TRelative    = RelativePathUrl
+type TJoinable    = RelativePathUrl | RelativePath
+type TResolveable = RootPathUrl | FullPathUrl
 
 /**
  * Fully qualified URL with origin, pathname, query, and fragment.
  * Immutable, compositional, and consistent with PathBase.
  */
-export class FullPathUrl extends UrlBase<Joinable> implements AbsolutePathOps<Resolveable, Joinable> {
-  readonly origin_: string
+export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<TRelative, TResolveable, TJoinable> {
+  readonly #origin: string
 
   constructor(url: string | URL | FullPathUrl) {
     const u = (url instanceof URL) ? url : (url instanceof FullPathUrl) ? url.toURL() : urt.newURL(url)
     super(u.href.slice(u.origin.length))
-    this.origin_ = u.origin
+    this.#origin = u.origin
   }
 
   /////////////////////////////////////////////////////////////////////////////
-  // --- Accessors ------------------------------------------------------------
+  //
+  // --- Accessors and converters ---------------------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
-  get origin(): string { return this.origin_ }
+  get origin(): string { return this.#origin }
   get href(): string { return this.toString() }
-
-  toURL(): URL {
-    return new URL(this.toString())
-  }
+  get rootPath(): RootPathUrl { return new RootPathUrl(urt.buildPath(this.pathParts)) }
+  toURL(): URL { return new URL(this.toString()) }
 
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- AbsolutePathOps implementation ---------------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
-  resolve(...args: readonly (JoinableBasic | Joinable | Resolveable)[]): this {
-    const { origin, ...parts } = urt.joinOrResolve(this.pathParts, args.filter(Boolean).map(String), { mode: 'resolve', baseOrigin: this.origin_ })
+  resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable)[]): this {
+    const { origin, ...parts } = urt.joinOrResolve(this.pathParts, args.filter(Boolean).map(String), { mode: 'resolve', baseOrigin: this.#origin })
     return this.cloneWithUrlString(`${origin}${urt.buildPath(parts)}`)
   }
 
+  relativeTo(base: this): TRelative {
+    if (this.#origin !== base.#origin) {
+      throw new Error('Cannot compute relative path between URLs with different origins.')
+    }
+    return new RelativePathUrl(this.nextPathString({ pathname: pth.relative(base.pathname, this.pathname) }))
+  }
+
+  descendsFrom(ancestor: this | string, opts?: { includeSelf?: boolean }): boolean {
+    const ancestorUrl = ancestor instanceof FullPathUrl ? ancestor : new FullPathUrl(ancestor)
+    if (this.#origin !== ancestorUrl.#origin) {
+      return false
+    }
+    return pth.descendsFrom(ancestorUrl.pathname, this.pathname, opts)
+  }
+
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- Mutation-like (immutable) operations ---------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
   replaceOrigin(origin: string | FullPathUrl): FullPathUrl {
-    const o = origin instanceof FullPathUrl ? origin.origin_ : origin
+    const o = origin instanceof FullPathUrl ? origin.#origin : origin
     return new FullPathUrl(`${o}${this.toString().replace(/^[^/]+\/\/[^/]+/, '')}`)
   }
 
-
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- Static methods ---------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
   /**
@@ -74,17 +95,19 @@ export class FullPathUrl extends UrlBase<Joinable> implements AbsolutePathOps<Re
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- UrlBase Overrides ------------------------------------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
   override toString(): string {
-    return `${this.origin_}${super.toString()}`
+    return `${this.#origin}${super.toString()}`
   }
 
   protected override cloneWithParts(params: Partial<UrlPathParts>): this {
     const ctor = this.constructor as new(path: string) => this
     const path = this.nextPathString(params)
-    return new ctor(`${this.origin_}${path}`)
+    return new ctor(`${this.#origin}${path}`)
   }
 
 }

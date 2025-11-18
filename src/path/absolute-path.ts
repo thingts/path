@@ -3,8 +3,9 @@ import { PathBase } from './path-base'
 import { RelativePath } from './relative-path'
 import { pth } from '../tools'
 
-type Joinable = RelativePath
-type Resolveable = AbsolutePath
+type TRelative = RelativePath
+type TJoinable = RelativePath
+type TResolveable = AbsolutePath
 
 /**
  * Represents an absolute filesystem path (i.e. a path starting at the root, i.e.
@@ -32,7 +33,7 @@ type Resolveable = AbsolutePath
  * ```
  *
  */
-export class AbsolutePath extends PathBase<Joinable> implements AbsolutePathOps<Resolveable, Joinable> {
+export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps<TRelative, TResolveable, TJoinable> {
   protected readonly path_: string
 
   /**
@@ -88,7 +89,7 @@ export class AbsolutePath extends PathBase<Joinable> implements AbsolutePathOps<
    * const p3 = p1.resolve('/etc/config') // '/etc/config' (resets to absolute path)
    * ```
    */
-  resolve(...args: readonly (JoinableBasic | Joinable | Resolveable)[]): this {
+  resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable)[]): this {
     return this.cloneWithPath(pth.resolve(this.path_, ...args.filter(Boolean).map(String)))
   }
 
@@ -133,13 +134,7 @@ export class AbsolutePath extends PathBase<Joinable> implements AbsolutePathOps<
    * ```
    */
   descendsFrom(ancestor: AbsolutePath | string, opts?: { includeSelf?: boolean }): boolean {
-    const { includeSelf = false } = opts ?? {}
-    const ancestorPath = pth.resolve(String(ancestor))
-    const current      = this.path_
-    if (includeSelf && current === ancestorPath) {
-      return true
-    }
-    return current.startsWith(ancestorPath + pth.sep)
+    return pth.descendsFrom(pth.resolve(String(ancestor)), this.path_, opts)
   }
 
   /////////////////////////////////////////////////////////////////////////////
