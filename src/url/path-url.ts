@@ -30,12 +30,10 @@ export function pathUrl(path: string | URL | FilenameOps | UrlBase<unknown>): Fu
 
   const s = String(path)
 
-  if (FullPathUrl.isFullPathUrlString(s)) {
-    return new FullPathUrl(s)
-  }
+  const parsed = urt.parseUrl(s)
 
-  if (urt.isNonHierarchicalUrl(s)) {
-    throw new Error(`Cannot create path URL from non-hierarchical URL: ${s}`)
+  if (parsed.kind !== 'invalid') {
+    return new FullPathUrl(s)
   }
 
   if (RootPathUrl.isRootPathUrlString(s)) {

@@ -8,8 +8,8 @@ import { fnt, pth, urt } from '../tools'
  * Provides query + fragment handling and immutable join/resolve utilities.
  */
 export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
-  readonly #pathname: string
-  readonly #query?: QueryParams
+  readonly #pathname:  string
+  readonly #query:     QueryParams
   readonly #fragment?: string
 
   constructor(path: string) {

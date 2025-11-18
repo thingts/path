@@ -31,7 +31,7 @@ export function parsePath(s: string): UrlPathParts {
   const fragment = fragmentIndex < s.length-1 ? s.slice(fragmentIndex + 1) : undefined
   return {
     pathname: normalizePathname(pathname),
-    query: queryStr ? parseQuery(queryStr) : undefined,
+    query:    queryStr ? parseQuery(queryStr) : {},
     fragment
   }
 }
@@ -64,25 +64,29 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | nu
   let query    = { ...cur.query }
   let fragment   = cur.fragment
   for (let str of segments) {
-    let relOrigin: string | undefined = undefined
 
     if (!str) { continue }
 
-    const isHierarchical = isHierarchicalUrl(str)
-    const isNonHierarchical = isNonHierarchicalUrl(str)
-    if (isHierarchical && detectOrigin) {
-      const u   = new URL(str)
-      str       = u.href.slice(u.origin.length)
-      relOrigin = u.origin
+    const parsed = parseUrl(str)
+    if (isResolve && detectOrigin) {
+      const { kind } = parsed
+      switch (kind) {
+        case 'opaque':
+        case 'invalid-origin': {
+          throw urlParseError(parsed, str)
+        }
+        case 'hierarchical': {
+          const { origin: segOrigin, path: segPath } = parsed
+          origin = segOrigin
+          str    = segPath
+          break
+        }
+      }
     }
     const { pathname: relPathname, query: relQuery, fragment: relFragment } = parsePath(str)
 
     if (isResolve) {
-      if (detectOrigin && isNonHierarchical) {
-        throw new Error(`Cannot resolve non-hierarchical URL: ${str}`)
-      }
-      if (relOrigin || relPathname.startsWith('/')) {
-        origin = relOrigin ?? origin
+      if (relPathname.startsWith('/')) {
         pathname = relPathname
         query = { ...relQuery }
         fragment = relFragment
@@ -100,42 +104,63 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | nu
 export function buildPath(params: UrlPathParts): string {
   const { pathname, query, fragment } = params
   const fragmentString = fragment ? ensureLeadingHash(fragment) : ''
-  const queryString  = query  ? queryToString(query)      : ''
+  const queryString  = queryToString(query)
   return `${pathname}${queryString}${fragmentString}`
 }
 
 function ensureLeadingHash(s: string): string { return s.startsWith('#') ? s : `#${s}` }
 
-const SCHEMA_RELATIVE = Symbol('schema-relative')
+const hierarchicalSchemes = new Set(['http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:'])
 
-const hierarchicalSchemas = new Set([ 'http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:', SCHEMA_RELATIVE ])
+const HierarchicalUrlRe = /^(?<origin>(?<scheme>[a-zA-Z][a-zA-Z0-9+\-.]*:)?\/\/(?<authority>[^/?#]*))(?<path>.*)$/
+const OpaqueUrlRe      = /^[a-zA-Z][a-zA-Z0-9+\-.]*:/
 
-export function isHierarchicalUrl(s: string): boolean {
-  const { valid, hierarchical } = parseUrl(s)
-  return valid && hierarchical
+type UrlParseResult = { kind: 'invalid' } | { kind: 'opaque' } | { kind: 'hierarchical', origin: string, path: string } | { kind: 'invalid-origin', origin: string }
+
+export function parseUrl(s: string): UrlParseResult {
+  const m = s.match(HierarchicalUrlRe)
+  if (!m) {
+    return {
+      kind: s.match(OpaqueUrlRe) ? 'opaque' : 'invalid',
+    }
+  }
+  const { scheme, authority, origin, path } = m.groups!
+  if (!isValidOrigin({ scheme, authority })) {
+    return {
+      kind: 'invalid-origin',
+      origin,
+    }
+  }
+  if (scheme && !hierarchicalSchemes.has(scheme.toLowerCase())) {
+    return {
+      kind: 'opaque',
+    }
+  }
+  return {
+    kind: 'hierarchical',
+    origin,
+    path,
+  }
 }
 
-export function isNonHierarchicalUrl(s: string): boolean {
-  const { valid, hierarchical } = parseUrl(s)
-  return valid && !hierarchical
+export function urlParseError(parseResult: UrlParseResult, s: string): Error {
+  switch (parseResult.kind) {
+    case 'opaque':
+      return new Error(`URL is non-hierarchical: ${s}`)
+    case 'invalid-origin':
+      return new Error(`Invalid origin '${parseResult.origin}' in URL: ${s}`)
+    case 'invalid':
+    default:
+      return new Error(`Invalid URL: ${s}`)
+  }
 }
 
-export function parseUrl(s: string): { valid: true, hierarchical: boolean, origin: string, path: string } | { valid: false, hierarchical: undefined, origin: undefined, path: undefined } {
-  const schemeRelative = s.startsWith('//')
+function isValidOrigin(params: { scheme?: string, authority: string }): boolean {
+  const { scheme, authority } = params
   try {
-    const u = new URL(`${schemeRelative ? 'http:' : ''}${s}/x`) // append dummy path to avoid errors on origin-only strings
-    return {
-      valid:        true,
-      hierarchical: hierarchicalSchemas.has(u.protocol),
-      origin:       schemeRelative ? `//${u.host}` : u.origin,
-      path:         u.href.slice(u.origin.length).slice(0, -2), // remove dummy path
-    }
+    new URL(`${scheme || 'http:'}//${authority}/`)
+    return true
   } catch {
-    return {
-      valid:        false,
-      hierarchical: undefined,
-      origin:       undefined,
-      path:         undefined,
-    }
+    return false
   }
 }

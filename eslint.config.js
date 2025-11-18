@@ -23,6 +23,7 @@ export default defineConfig(
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-confusing-void-expression": ["error", { "ignoreVoidOperator": true, "ignoreArrowShorthand": true }],
       "@typescript-eslint/no-empty-function": ["error", { "allow": ["arrowFunctions", "private-constructors", "protected-constructors"] }],
+      "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-unused-vars": ["error", { "args": "all", "argsIgnorePattern": "^_", "caughtErrors": "all", "caughtErrorsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_", "varsIgnorePattern": "^_", "ignoreRestSiblings": true } ],
       "@typescript-eslint/explicit-function-return-type": ["error",
         {

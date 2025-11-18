@@ -30,11 +30,11 @@ describe('FullPathUrl', () => {
 
   it('throws on invalid URL', () => {
     expect(() => new FullPathUrl('not-a-url')).toThrow(/Invalid URL.*not-a-url/)
-    expect(() => new FullPathUrl('http://badc[aracter.com')).toThrow(/Invalid URL/)
+    expect(() => new FullPathUrl('http://badc[aracter.com')).toThrow(/Invalid origin/)
   })
 
   it('throws on non-hierarchical URL', () => {
-    expect(() => new FullPathUrl('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')).toThrow(/non-hierarchical URL/)
+    expect(() => new FullPathUrl('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')).toThrow(/non-hierarchical/)
   })
 
   it('join() merges query params and replaces fragment', () => {
