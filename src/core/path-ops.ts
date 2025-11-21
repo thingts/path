@@ -20,7 +20,7 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
    * new RelativePath('a/b/c.txt').filename  // 'c.txt' (Filename)
    * ```
    */
-  get filename(): Filename
+  get filename(): Filename | undefined
 
   /**
    * The parent directory of this path.
@@ -33,6 +33,16 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
    * ```
    */
   get parent(): this
+
+  /**
+   * The segments of this path as an array of strings.
+   * @example
+   * ```ts
+   * new AbsolutePath('/a/b/c.txt').segments // ['a', 'b', 'c.txt']
+   * new RelativePath('a/b/c.txt').segments  // ['a', 'b', 'c.txt']
+   * ```
+   */
+  get segments(): string[]
 
   /////////////////////////////////////////////////////////////////////////////
   //

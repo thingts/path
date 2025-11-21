@@ -24,7 +24,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
       throw urt.urlParseError(parsed, str)
     }
     const { path, origin } = parsed
-    super(path)
+    super('/'+path) // ensure leading slash
     this.#origin = origin
   }
 
@@ -46,7 +46,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   /////////////////////////////////////////////////////////////////////////////
 
   resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable)[]): this {
-    const { origin, ...parts } = urt.joinOrResolve(this.pathParts, args.filter(Boolean).map(String), { mode: 'resolve', baseOrigin: this.#origin })
+    const { origin, ...parts } = urt.resolve(this.pathParts, args.filter(Boolean).map(String), { baseOrigin: this.#origin })
     return this.cloneWithUrlString(`${origin}${urt.buildPath(parts)}`)
   }
 

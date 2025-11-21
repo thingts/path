@@ -114,3 +114,12 @@ export function descendsFrom(ancestor: string, target: string, opts?: { includeS
 export function isAbsolute(p: string): boolean {
   return p.startsWith(PATH_SEPARATOR)
 }
+
+export function conformAbsolute(p: string, absolute: boolean): string {
+  const isAbs = isAbsolute(p)
+  if (absolute) {
+    return isAbs ? p : PATH_SEPARATOR + p
+  } else {
+    return isAbs ? p.replace(/^\/+/, '') : p
+  }
+}

@@ -20,42 +20,63 @@ function parseQuery(q: string): QueryParams {
 }
 
 export function parsePath(s: string): UrlPathParts {
-  const endify       = (x: number): number => (x === -1) ? s.length : x
-  const hashIndex    = endify(s.lastIndexOf('#'))
-  const queryIndex   = endify(s.lastIndexOf('?'))
-  const fragmentIndex  = (queryIndex === s.length || queryIndex < hashIndex) ? hashIndex : s.length
-  const pathEndIndex = Math.min(fragmentIndex, queryIndex)
+  const slashIndex = s.lastIndexOf('/')
 
-  const pathname = s.slice(0, pathEndIndex)
-  const queryStr = queryIndex < fragmentIndex ? s.slice(queryIndex + 1, fragmentIndex) : undefined
-  const fragment = fragmentIndex < s.length-1 ? s.slice(fragmentIndex + 1) : undefined
+  const hashIndex = s.lastIndexOf('#')
+  const fragment = (hashIndex > slashIndex) ? s.slice(hashIndex+1) : undefined
+  if (fragment !== undefined) {
+    s = s.slice(0, hashIndex)
+  }
+
+  const queryIndex = s.lastIndexOf('?')
+  const queryStr = (queryIndex > slashIndex) ? s.slice(queryIndex+1) : undefined
+  if (queryStr !== undefined) {
+    s = s.slice(0, queryIndex)
+  }
+
   return {
-    pathname: normalizePathname(pathname),
+    pathname: normalizePathname(s),
     query:    queryStr ? parseQuery(queryStr) : {},
     fragment
   }
 }
 
 
-// Converts a query object back to a query string.  Canonicalizes by sorting keys.
+// Converts a query object back to a query string.
 function queryToString(q: QueryParams): string {
   const entries = Object.entries(q).flatMap(([k, v]) =>
     Array.isArray(v) ? v.map(x => [k, x]) : [[k, v]]
   )
-  entries.sort((a, b) => a[0].localeCompare(b[0]))
   if (!entries.length) return ''
-  return '?' + entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')
+  return '?' + entries.map(([k, v]) => `${normalizeComponent(k)}=${normalizeComponent(v)}`).join('&')
+}
+
+export function mergeQueries(base: QueryParams, override: QueryParams): QueryParams {
+  const result: QueryParams = { ...base }
+  for (const [k, v] of Object.entries(override)) {
+    result[k] = (k in result) ? ([] as string[]).concat(result[k], v) : v
+  }
+  return result
 }
 
 function normalizePathname(path: string): string {
-  const pathNormalized = pth.normalize(path)
+  const trailingSlash = path.endsWith('/') && path !== '/'
+  const pathNormalized = pth.normalize(path) 
   if (pathNormalized === '.') return ''
-  return(encodeURI(pathNormalized).replace(/[?#]/g, encodeURIComponent)).replace(/%25/g, '%') // double-encoded % -> single-encoded
+  return unDoubleEncode(encodeURI(pathNormalized + (trailingSlash ? '/' : '')).replace(/[?#]/g, encodeURIComponent))
 }
 
-export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve' }): UrlPathParts
-export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin: string}): UrlPathParts & { origin: string }
-export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin?: string}): UrlPathParts & { origin?: string } {
+function normalizeComponent(s: string): string {
+  return unDoubleEncode(encodeURIComponent(s))
+}
+
+function unDoubleEncode(s: string): string {
+  return s.replace(/%25([0-9a-f]{2})/gi, '%$1')
+}
+
+function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve' }): UrlPathParts
+function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin: string}): UrlPathParts & { origin: string }
+function joinOrResolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { mode: 'join' | 'resolve', baseOrigin?: string}): UrlPathParts & { origin?: string } {
   const { mode, baseOrigin } = opts
   const isResolve = mode === 'resolve'
   const detectOrigin = isResolve && (baseOrigin !== undefined)
@@ -101,14 +122,24 @@ export function joinOrResolve(cur: UrlPathParts, segments: readonly (string | nu
 
 }
 
+export function join(cur: UrlPathParts, segments: readonly (string | null | undefined)[]): UrlPathParts {
+  return joinOrResolve(cur, segments, { mode: 'join' })
+}
+
+export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[]): UrlPathParts
+export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { baseOrigin: string}): UrlPathParts & { origin: string }
+export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts?: { baseOrigin: string }): UrlPathParts {
+  return joinOrResolve(cur, segments, { mode: 'resolve', ...opts })
+}
+
 export function buildPath(params: UrlPathParts): string {
   const { pathname, query, fragment } = params
-  const fragmentString = fragment ? ensureLeadingHash(fragment) : ''
+  const fragmentString = fragment === undefined ? '' : '#' + normalizeComponent(stripLeadingHash(fragment))
   const queryString  = queryToString(query)
   return `${pathname}${queryString}${fragmentString}`
 }
 
-function ensureLeadingHash(s: string): string { return s.startsWith('#') ? s : `#${s}` }
+function stripLeadingHash(s: string): string { return s.startsWith('#') ? s.slice(1) : s }
 
 const hierarchicalSchemes = new Set(['http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:'])
 
@@ -124,7 +155,8 @@ export function parseUrl(s: string): UrlParseResult {
       kind: s.match(OpaqueUrlRe) ? 'opaque' : 'invalid',
     }
   }
-  const { scheme, authority, origin, path } = m.groups!
+  const { scheme, authority, origin: rawOrigin, path } = m.groups!
+  const origin = rawOrigin.toLowerCase()
   if (!isValidOrigin({ scheme, authority })) {
     return {
       kind: 'invalid-origin',

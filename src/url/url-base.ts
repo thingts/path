@@ -3,6 +3,10 @@ import type { QueryParams, UrlPathParts } from './url-types'
 import { Filename } from '../filename'
 import { fnt, pth, urt } from '../tools'
 
+type Override<T, R> = Omit<T, keyof R> & R
+const RemovePart = Symbol('url-base.RemovePart')
+type RemovablePathParts = Override<UrlPathParts, { fragment: string | typeof RemovePart }>
+
 /**
  * Base class for all URL-style path types.
  * Provides query + fragment handling and immutable join/resolve utilities.
@@ -20,12 +24,16 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- Accessors ------------------------------------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
-  get pathname(): string { return this.#pathname }
-  get query():    QueryParams { return { ...this.#query } }
+  get pathname(): string             { return this.#pathname }
+  get query():    QueryParams        { return { ...this.#query } }
   get fragment(): string | undefined { return this.#fragment }
+  get isDirectory(): boolean         { return this.#pathname.endsWith('/') || this.#pathname === '' || this.#pathname === '/' }
+  get segments(): string[]           { return this.#pathname.split('/').filter(Boolean) }
 
   /** @hidden */
   protected get pathParts(): UrlPathParts {
@@ -37,27 +45,50 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- PathOps implementation -----------------------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
-  get stem(): string       { return this.filename.stem }
-  get extension(): string  { return this.filename.extension }
-  get filename(): Filename { return new Filename(this.filename_) }
-  get parent(): this       { return this.cloneWithPathname(pth.dirname(this.#pathname)) }
+  get stem(): string | undefined         { return this.filename?.stem }
+  get extension(): string | undefined    { return this.filename?.extension }
+  get filename(): Filename | undefined   { return this.#filenameStr ? new Filename(this.#filenameStr) : undefined }
+  get parent(): this                     { return this.cloneWithPathname(pth.dirname(this.#pathname)) }
 
-  replaceExtension(newExtension: string): this                           { return this.cloneWithFilename(this.filename.replaceExtension(newExtension)) }
-  replaceFilename(newFilename: string | Filename): this                  { return this.cloneWithFilename(String(newFilename)) }
-  replaceParent(newParent: string | this): this                          { return this.cloneWithPathname(pth.join(String(newParent), this.filename_)) }
-  replaceStem(newStem: string): this                                     { return this.cloneWithFilename(this.filename.replaceStem(newStem)) }
-  transformFilename(fn: (filename: Filename) => string | Filename): this { return this.cloneWithFilename(fn(this.filename)) }
+  replaceExtension(newExtension: string): this {
+    return this.cloneWithFilename(this.#requireFilename('replaceExtension').replaceExtension(newExtension))
+  }
+
+  replaceFilename(newFilename: string | Filename): this {
+    void this.#requireFilename('replaceFilename')
+    return this.cloneWithFilename(String(newFilename))
+  }
+
+  replaceParent(newParent: string | this): this {
+    const parts = this.pathParts
+    parts.pathname = ''
+    return this.cloneWithPathname(urt.join(parts, [String(newParent), this.#leaf, this.isDirectory ? '/' : '']).pathname)
+  }
+
+  replaceStem(newStem: string): this {
+    return this.cloneWithFilename(this.#requireFilename('replaceStem').replaceStem(newStem))
+  }
+
+  transformFilename(fn: (filename: Filename) => string | Filename): this {
+    return this.cloneWithFilename(fn(this.#requireFilename('transformFilename')))
+  }
 
   join(...segments: readonly (JoinableBasic | TJoinable)[]): this {
-    const pathParts = urt.joinOrResolve(this.pathParts, segments.filter(Boolean).map(String), { mode: 'join' })
+    const pathParts = urt.join(this.pathParts, segments.filter(Boolean).map(String))
     return this.cloneWithParts(pathParts)
   }
 
+  equals(other: string | this): boolean { return this.toString() === String(other) }
+
   /////////////////////////////////////////////////////////////////////////////
+  //
   // --- Mutation-like (immutable) operations ---------------------------------
+  //
   /////////////////////////////////////////////////////////////////////////////
 
   replacePathname(path: string | FilenameOps): this {
@@ -77,6 +108,32 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
     return this.cloneWithParts({ fragment })
   }
 
+  removeFragment(): this {
+    return this.cloneWithParts({ fragment: RemovePart })
+  }
+
+  unDirectory(): this {
+    if (this.isDirectory) {
+      return this.cloneWithParts({ pathname: this.#pathname.replace(/\/+$/,'') })
+    }
+    return this
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  //
+  // --- Stringification ------------------------------------------------------
+  //
+  /////////////////////////////////////////////////////////////////////////////
+
+  toString(): string {
+    return urt.buildPath(this.pathParts)
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  //
+  // --- Internals -----------------------------------------------------------
+  //
+  /////////////////////////////////////////////////////////////////////////////
 
   /**
    * Protected helper to construct a new path string, optionally given any of a
@@ -85,12 +142,12 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    *
    * Used by all mutation-like methods to build the new path string.
    */
-  protected nextPathString(params: Partial<UrlPathParts>): string {
+  protected nextPathString(params: Partial<RemovablePathParts>): string {
     const { pathname, query, fragment } = params
     return urt.buildPath({
-      pathname: pathname ?? this.#pathname,
+      pathname: (pathname !== undefined) ? pth.conformAbsolute(pathname, this.#isAbsolute) : this.#pathname,
       query:    query    ?? this.#query,
-      fragment: fragment ?? this.#fragment
+      fragment: (fragment === RemovePart) ? undefined : (fragment ?? this.#fragment),
     })
   }
 
@@ -103,7 +160,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * class, allowing derived classes that inherit those methods to return new
    * instances of themselves without needing to override them.
    */
-  protected cloneWithParts(params: Partial<UrlPathParts>): this {
+  protected cloneWithParts(params: Partial<RemovablePathParts>): this {
     const ctor = this.constructor as new(path: string) => this
     const path = this.nextPathString(params)
     return new ctor(path)
@@ -118,27 +175,16 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
     return new ctor(path)
   }
 
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  // --- FilenameBase abstract method implemenations ---
-  //
-  /////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Returns true if this path equals the other path or string.
-   * Does not depend on the order of query parameters.
-   */
-  equals(other: string | this): boolean                   { return this.toString() === this.cloneWithUrlString(String(other)).toString() }
-
-  protected get filename_(): string                       { return fnt.basename(this.#pathname) }
   protected cloneWithFilename(filename: string|Filename): this { return this.parent.join(filename) }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // --- Stringification ------------------------------------------------------
-  /////////////////////////////////////////////////////////////////////////////
 
-  toString(): string {
-    return urt.buildPath(this.pathParts)
+  get #leaf(): string | undefined        { return [...this.segments].pop() }
+  get #filenameStr(): string | undefined { return this.isDirectory ? undefined : fnt.basename(this.#pathname) }
+  get #isAbsolute(): boolean             { return pth.isAbsolute(this.#pathname) }
+
+  #requireFilename(what: string): Filename {
+    return this.filename ??
+      (() => { throw new Error(`Can't ${what}, directory path has no filename: ${this.toString()}`) })()
   }
 
 }

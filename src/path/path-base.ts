@@ -4,9 +4,14 @@ import { fnt, pth } from '../tools'
 
 export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
   get #filename(): string { return fnt.basename(this.path_) }
+  get #isAbsolute(): boolean { return pth.isAbsolute(this.path_) }
 
   /** @hidden Implemented by subclasses to hold the normalized path string. */
-  protected abstract path_: string
+  protected readonly path_: string
+
+  constructor(path: string) {
+    this.path_ = pth.normalize(path)
+  }
 
   /**
    * Protected factory to construct a new instance of the current class, with
@@ -22,7 +27,7 @@ export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
    */
   protected cloneWithPath(path: string | FilenameOps): this {
     const ctor = this.constructor as new(path: string) => this
-    return new ctor(path.toString())
+    return new ctor(pth.conformAbsolute(path.toString(), this.#isAbsolute))
   }
 
   /**
@@ -45,6 +50,7 @@ export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
   get extension(): string  { return this.filename.extension }
   get filename(): Filename { return new Filename(this.#filename) }
   get parent(): this       { return this.cloneWithPath(pth.dirname(this.path_)) }
+  get segments(): string[] { return this.path_.split(pth.sep).filter(Boolean) }
 
   replaceStem(newStem: string): this                                     { return this.cloneWithFilename(this.filename.replaceStem(newStem)) }
   replaceExtension(newExt: string): this                                 { return this.cloneWithFilename(this.filename.replaceExtension(newExt)) }
@@ -56,5 +62,4 @@ export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
 
   toString(): string                    { return this.path_ }
   equals(other: string | this): boolean { return this.path_ === this.cloneWithPath(String(other)).path_ }
-
 }

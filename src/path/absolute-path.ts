@@ -34,7 +34,6 @@ type TResolveable = AbsolutePath
  *
  */
 export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps<TRelative, TResolveable, TJoinable> {
-  protected readonly path_: string
 
   /**
    * Create a new {@link AbsolutePath} from a string or another {@link AbsolutePath}.
@@ -52,16 +51,11 @@ export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps
    * ```
    */
   constructor(path: string | AbsolutePath) {
-    super()
     path = String(path)
     if (!AbsolutePath.isAbsolutePathString(path)) {
       throw new Error(`Path must be absolute: "${path}"`)
     }
-    this.path_ = AbsolutePath.#canonicalize(path)
-  }
-
-  static #canonicalize(p: string): string {
-    return pth.normalize(pth.resolve(p))
+    super(pth.resolve(path))
   }
 
   /////////////////////////////////////////////////////////////////////////////

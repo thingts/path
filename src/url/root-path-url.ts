@@ -24,7 +24,7 @@ export class RootPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   /////////////////////////////////////////////////////////////////////////////
 
   resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable | null | undefined)[]): this {
-    const parts = urt.joinOrResolve(this.pathParts, args.filter(Boolean).map(String), { mode: 'resolve' })
+    const parts = urt.resolve(this.pathParts, args.filter(Boolean).map(String))
     return this.cloneWithUrlString(urt.buildPath(parts))
   }
 

@@ -22,8 +22,6 @@ type Joinable = RelativePath
  */
 export class RelativePath extends PathBase<Joinable> {
 
-  protected path_: string
-
   /**
    * Create a new {@link RelativePath} from a string or another {@link RelativePath}.
    *
@@ -40,12 +38,11 @@ export class RelativePath extends PathBase<Joinable> {
    * ```
    */
   constructor(relpath: string | RelativePath) {
-    super()
     relpath = String(relpath)
     if (!RelativePath.isRelativePathString(relpath)) {
       throw new Error(`Path must be relative, not absolute: "${relpath}"`)
     }
-    this.path_ = pth.normalize(relpath)
+    super(relpath)
   }
 
   /////////////////////////////////////////////////////////////////////////////

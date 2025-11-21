@@ -8,7 +8,7 @@ export interface FilenameOps {
    * that dot is considered part of the stem.  So `.gitignore` has
    * extension `''` and `.gitignore.bak` has extension `.bak`
    */
-  get extension(): string
+  get extension(): string | undefined
 
   /**
    * Returns the stem of the filename, i.e. the part before the extension.
@@ -19,7 +19,7 @@ export interface FilenameOps {
    * `.gitignore.bak` both have stem `.gitignore`
    */
 
-  get stem(): string 
+  get stem(): string  | undefined
 
   /**
    * Replace the filename stem, keeping the extension the same
