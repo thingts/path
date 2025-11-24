@@ -13,17 +13,5 @@ describe('RelativePathUrl', () => {
 
   })
 
-
-  it('toString includes query and fragment', () => {
-    const u = new RelativePathUrl('foo/bar').replaceQuery({ a: '1' }).replaceFragment('frag')
-    expect(String(u)).toBe('foo/bar?a=1#frag')
-  })
-
-  it('join() merges query and replaces fragment', () => {
-    const u = new RelativePathUrl('foo?a=a1#old')
-    const v = u.join('bar?b=b1#new')
-    expect(String(v)).toBe('foo/bar?a=a1&b=b1#new')
-  })
-
 })
 

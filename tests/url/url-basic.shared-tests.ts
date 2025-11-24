@@ -1,5 +1,6 @@
 import type { FullPathUrl, RootPathUrl, RelativePathUrl } from '$src'
 import { describe, it, expect } from 'vitest'
+import { pathOpsTests } from '../path-ops.shared-tests'
 
 function isAbsolute(url: FullPathUrl | RootPathUrl | RelativePathUrl): boolean {
   return url.pathname.startsWith('/')
@@ -31,6 +32,8 @@ export function urlBasicTests(params: { make: (s: string) => FullPathUrl | RootP
 
   describe('basic behavior', () => {
 
+    pathOpsTests({ make: makeUrl, stringify })
+
     describe('constructor', () => {
       it('normalizes path slashes', () => {
         const u = makeUrl('foo///bar////./baz')
@@ -59,7 +62,7 @@ export function urlBasicTests(params: { make: (s: string) => FullPathUrl | RootP
 
         it('does not encode unreserved characters', () => {
           const u = makeUrl('abc-._~xyz')
-          expect(u.pathname).toBe(pathify('/abc-._~xyz'))
+          expect(String(u)).toBe(stringify('/abc-._~xyz'))
         })
 
         it('encodes reserved characters in query', () => {
@@ -326,31 +329,6 @@ export function urlBasicTests(params: { make: (s: string) => FullPathUrl | RootP
       expect(String(v)).toBe(stringify('/foo'))
     })
 
-    describe('pathname manipulation', () => {
-
-      it('extracts filename', () => {
-        const u = makeUrl('path/to/file.txt')
-        expect(u.filename?.toString()).toBe('file.txt')
-      })
-
-      it('modifies filename, maintains decoration', () => {
-        const u = makeUrl('path/to/file.txt?a=1#frag')
-        const v = u.replaceExtension('.jpg')
-        expect(v.toString()).toBe(stringify('/path/to/file.jpg?a=1#frag'))
-      })
-
-      it('gets parent path, maintains decoration', () => {
-        const u = makeUrl('path/to/file.txt?a=1#frag')
-        const parent = u.parent
-        expect(parent.toString()).toBe(stringify('/path/to?a=1#frag'))
-      })
-
-      it('join ignores empty segments', () => {
-        const u = makeUrl('path/to')
-        const v = u.join('', null, undefined, 'file.txt')
-        expect(v.toString()).toBe(stringify('/path/to/file.txt'))
-      })
-    })
 
     describe('replaceParent', () => {
 

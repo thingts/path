@@ -1,14 +1,13 @@
-import { AbsolutePath, Filename, RelativePath } from '$src'
+import { AbsolutePath, RelativePath } from '$src'
 import { describe, it, expect } from 'vitest'
+import { pathBasicTests } from './path-basic.shared-tests'
+
 
 describe('AbsolutePath', () => {
 
-  describe('constructor', () => {
-    it('normalizes paths', () => {
-      const p = new AbsolutePath('/foo/../bar/.//baz.txt/')
-      expect(String(p)).toBe('/bar/baz.txt')
-    })
+  pathBasicTests({ make: (s: string) => new AbsolutePath(s), kind: 'absolute' })
 
+  describe('constructor', () => {
     it('throws if given a relative path', () => {
       expect(() => new AbsolutePath('foo/bar/baz.txt')).toThrow()
       expect(() => new AbsolutePath('./foo/bar')).toThrow()
@@ -19,64 +18,13 @@ describe('AbsolutePath', () => {
 
   describe('path properties and manipulation', () => {
 
-    it('tests equality of paths', () => {
+    it('tests equality', () => {
       const p1 = new AbsolutePath('/foo/bar/A.txt')
       const p2 = new AbsolutePath('/foo/bar/A.txt')
       const p3 = new AbsolutePath('/foo/bar/B.txt')
       expect(p1.equals(p2)).toBe(true)
       expect(p1.equals(p3)).toBe(false)
       expect(p1.equals('/foo/bar/A.txt/')).toBe(true)
-    })
-
-    it('exposes filename, stem, extension', () => {
-      const p = new AbsolutePath('/tmp/foo/bar/file.test.txt')
-      expect(p.filename).toBeInstanceOf(Filename)
-      expect(String(p.filename)).toBe('file.test.txt')
-      expect(p.stem).toBe('file.test')
-      expect(p.extension).toBe('.txt')
-    })
-
-    it('exposes parent directory as AbsolutePath', () => {
-      const p = new AbsolutePath('/tmp/foo/bar/file.txt')
-      const parent = p.parent
-      expect(parent).toBeInstanceOf(AbsolutePath)
-      expect(String(parent)).toBe('/tmp/foo/bar')
-    })
-
-    it('can replace filename, stem, extension, parent', () => {
-      const p = new AbsolutePath('/foo/bar/file.txt')
-      const p1 = p.replaceFilename('x.y')
-      expect(p1).toBeInstanceOf(AbsolutePath)
-      expect(String(p1)).toBe('/foo/bar/x.y')
-
-      const p2 = p.replaceStem('file2')
-      expect(p2).toBeInstanceOf(AbsolutePath)
-      expect(String(p2)).toBe('/foo/bar/file2.txt')
-
-      const p3 = p.replaceExtension('.md')
-      expect(p3).toBeInstanceOf(AbsolutePath)
-      expect(String(p3)).toBe('/foo/bar/file.md')
-
-      const p4 = p.replaceParent('/tmp')
-      expect(p4).toBeInstanceOf(AbsolutePath)
-      expect(String(p4)).toBe('/tmp/file.txt')
-    })
-
-    it('can transform filename', () => {
-      const p = new AbsolutePath('/foo/bar/file.txt')
-      const p1 = p.transformFilename(fn => {
-        expect(fn).toBeInstanceOf(Filename)
-        return fn.toString().toUpperCase()
-      })
-      expect(p1).toBeInstanceOf(AbsolutePath)
-      expect(String(p1)).toBe('/foo/bar/FILE.TXT')
-    })
-
-    it('can join segments to form a new path', () => {
-      const p = new AbsolutePath('/foo/bar')
-      expect(p.join('baz.txt')).toBeInstanceOf(AbsolutePath)
-      expect(String(p.join('baz.txt'))).toBe('/foo/bar/baz.txt')
-      expect(String(p.join('baz', null, 'qux.txt'))).toBe('/foo/bar/baz/qux.txt')
     })
 
     it('can extract relative path', () => {

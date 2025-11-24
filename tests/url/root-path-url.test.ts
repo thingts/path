@@ -11,28 +11,6 @@ describe('RootPathUrl', () => {
       expect(() => new RootPathUrl('/foo')).not.toThrow()
     })
 
-    it('accepts query and fragment', () => {
-      const u = new RootPathUrl('/foo?a=1#frag')
-      expect(u.query).toEqual({ a: '1' })
-      expect(u.fragment).toBe('frag')
-    })
-  })
-
-  it('pathName has leading slash', () => {
-    const u = new RootPathUrl('/foo/bar')
-    expect(u.pathname).toBe('/foo/bar')
-  })
-
-
-  it('toString includes query and fragment', () => {
-    const u = new RootPathUrl('/foo/bar').replaceQuery({ a: '1' }).replaceFragment('frag')
-    expect(String(u)).toBe('/foo/bar?a=1#frag')
-  })
-
-  it('join() merges query and replaces fragment', () => {
-    const u = new RootPathUrl('/foo?a=a1#old')
-    const v = u.join('bar?b=b1#new')
-    expect(String(v)).toBe('/foo/bar?a=a1&b=b1#new')
   })
 
   describe('resolve()', () => {
