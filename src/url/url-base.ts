@@ -1,11 +1,11 @@
 import type { FilenameOps, PathOps, JoinableBasic } from '../core'
-import type { QueryParams, UrlPathParts } from './url-types'
+import type { UrlPathParts, UrlQueryParams } from './url-types'
 import { Filename } from '../filename'
 import { fnt, pth, urt } from '../tools'
 
 type Override<T, R> = Omit<T, keyof R> & R
 const RemovePart = Symbol('url-base.RemovePart')
-type RemovablePathParts = Override<UrlPathParts, { fragment: string | typeof RemovePart }>
+type RemovablePathParts = Override<UrlPathParts, { fragment: string | typeof RemovePart, query: UrlQueryParams | typeof RemovePart }>
 
 /**
  * Base class for all URL-style path types.
@@ -13,11 +13,11 @@ type RemovablePathParts = Override<UrlPathParts, { fragment: string | typeof Rem
  */
 export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   readonly #pathname:  string
-  readonly #query:     QueryParams
+  readonly #query?:    UrlQueryParams
   readonly #fragment?: string
 
-  constructor(path: string) {
-    const { pathname, query, fragment } = urt.parsePath(path)
+  constructor(parts:  UrlPathParts) {
+    const { pathname, query, fragment } = parts
     this.#pathname = pathname
     this.#query    = query
     this.#fragment = fragment
@@ -29,14 +29,14 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   //
   /////////////////////////////////////////////////////////////////////////////
 
-  get pathname(): string             { return this.#pathname }
-  get query():    QueryParams        { return { ...this.#query } }
-  get fragment(): string | undefined { return this.#fragment }
-  get isDirectory(): boolean         { return this.#pathname.endsWith('/') || this.#pathname === '' || this.#pathname === '/' }
-  get segments(): string[]           { return this.#pathname.split('/').filter(Boolean) }
+  get pathname(): string                     { return this.#pathname }
+  get query():    UrlQueryParams | undefined { return this.#query && { ...this.#query } }
+  get fragment(): string | undefined         { return this.#fragment }
+  get isDirectory(): boolean                 { return this.#pathname.endsWith('/') || this.#pathname === '/' || this.#pathname === '.'}
+  get segments(): string[]                   { return this.#pathname.split('/').filter(Boolean) }
 
   /** @hidden */
-  protected get pathParts(): UrlPathParts {
+  protected get parts(): UrlPathParts {
     return {
       pathname: this.#pathname,
       query:    this.#query,
@@ -65,7 +65,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   }
 
   replaceParent(newParent: string | this): this {
-    const parts = this.pathParts
+    const parts = this.parts
     parts.pathname = ''
     return this.cloneWithPathname(urt.join(parts, [String(newParent), this.#leaf, this.isDirectory ? '/' : '']).pathname)
   }
@@ -79,8 +79,8 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   }
 
   join(...segments: readonly (JoinableBasic | TJoinable)[]): this {
-    const pathParts = urt.join(this.pathParts, segments.filter(Boolean).map(String))
-    return this.cloneWithParts(pathParts)
+    const parts = urt.join(this.parts, segments.filter(Boolean).map(String))
+    return this.cloneWithParts(parts)
   }
 
   equals(other: string | this): boolean { return this.toString() === String(other) }
@@ -95,17 +95,21 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
     return this.cloneWithParts({ pathname: String(path) })
   }
 
-  replaceQuery(query: QueryParams): this {
+  replaceQuery(query: UrlQueryParams): this {
     return this.cloneWithParts({ query })
   }
 
-  mergeQuery(query: QueryParams): this {
-    const merged: QueryParams = { ...this.#query, ...query }
+  mergeQuery(query: UrlQueryParams): this {
+    const merged: UrlQueryParams = { ...this.#query, ...query }
     return this.cloneWithParts({ query: merged })
   }
 
+  removeQuery(): this {
+    return this.cloneWithParts({ query: RemovePart })
+  }
+
   replaceFragment(fragment: string): this {
-    return this.cloneWithParts({ fragment })
+    return this.cloneWithParts({ fragment: urt.stripLeadingHash(fragment) })
   }
 
   removeFragment(): this {
@@ -126,7 +130,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   /////////////////////////////////////////////////////////////////////////////
 
   toString(): string {
-    return urt.buildPath(this.pathParts)
+    return urt.partsToString(this.parts)
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -134,21 +138,14 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   // --- Internals -----------------------------------------------------------
   //
   /////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Protected helper to construct a new path string, optionally given any of a
-   * new pathname, query, or fragment.  Any not provided will default to the
-   * current instance's value.
-   *
-   * Used by all mutation-like methods to build the new path string.
-   */
-  protected nextPathString(params: Partial<RemovablePathParts>): string {
-    const { pathname, query, fragment } = params
-    return urt.buildPath({
+  
+  protected nextParts(overrides: Partial<RemovablePathParts> = {}): UrlPathParts {
+    const { pathname, query, fragment } = overrides
+    return {
       pathname: (pathname !== undefined) ? pth.conformAbsolute(pathname, this.#isAbsolute) : this.#pathname,
-      query:    query    ?? this.#query,
+      query:    (query  === RemovePart) ? undefined : (query ?? this.#query),
       fragment: (fragment === RemovePart) ? undefined : (fragment ?? this.#fragment),
-    })
+    }
   }
 
   /*
@@ -161,18 +158,12 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * instances of themselves without needing to override them.
    */
   protected cloneWithParts(params: Partial<RemovablePathParts>): this {
-    const ctor = this.constructor as new(path: string) => this
-    const path = this.nextPathString(params)
-    return new ctor(path)
+    const ctor = this.constructor as new(parts: UrlPathParts) => this
+    return new ctor(this.nextParts(params))
   }
 
   protected cloneWithPathname(pathname: string): this {
     return this.cloneWithParts({ pathname })
-  }
-
-  protected cloneWithUrlString(path: string): this {
-    const ctor = this.constructor as new(path: string) => this
-    return new ctor(path)
   }
 
   protected cloneWithFilename(filename: string|Filename): this { return this.parent.join(filename) }

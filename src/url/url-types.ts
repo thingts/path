@@ -1,7 +1,31 @@
-export type QueryParams = Record<string, string | string[]>
+export type UrlQueryParams = Record<string, string | string[]>
 
 export type UrlPathParts = {
   pathname:  string,
-  query:     QueryParams,
+  query?:    UrlQueryParams,
   fragment?: string
+}
+
+export function isUrlPathParts(obj: unknown): obj is UrlPathParts {
+  if (typeof obj !== 'object' || obj === null) {
+    return false
+  }
+  const cast = obj as UrlPathParts
+  if (typeof cast.pathname !== 'string') { return false }
+  if (cast.query !== undefined && typeof cast.query !== 'object') { return false }
+  if (cast.fragment !== undefined && typeof cast.fragment !== 'string') { return false }
+  return true
+}
+
+export type UrlFullParts = UrlPathParts & {
+  origin: string
+}
+
+export function isUrlFullParts(obj: unknown): obj is UrlFullParts {
+  if (!isUrlPathParts(obj)) {
+    return false
+  } 
+  const cast = obj as UrlFullParts
+  if (typeof cast.origin !== 'string') { return false }
+  return true
 }

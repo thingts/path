@@ -1,6 +1,6 @@
 import type { AbsolutePathOps, JoinableBasic } from '../core'
 import type { RelativePath } from '../path'
-import type { UrlPathParts } from './url-types'
+import type { UrlFullParts } from './url-types'
 import { RelativePathUrl } from './relative-path-url'
 import { RootPathUrl } from './root-path-url'
 import { UrlBase } from './url-base'
@@ -17,15 +17,14 @@ type TResolveable = RootPathUrl | FullPathUrl
 export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<TRelative, TResolveable, TJoinable> {
   readonly #origin: string
 
-  constructor(url: string | URL | FullPathUrl) {
-    const str = String(url)
-    const parsed = urt.parseUrl(str)
-    if (parsed.kind !== 'hierarchical') {
-      throw urt.urlParseError(parsed, str)
+  constructor(url: string | URL | FullPathUrl | UrlFullParts) {
+    const parts = url instanceof FullPathUrl ? url.parts : (typeof url === 'string' || url instanceof URL ) ? urt.parseFullUrl(String(url)) : url
+    if (parts.pathname === '.') { parts.pathname = '/' }
+    if (!pth.isAbsolute(parts.pathname)) {
+      throw new Error(`FullPathUrl requires an absolute pathname. Got: '${parts.pathname}'`)
     }
-    const { path, origin } = parsed
-    super('/'+path) // ensure leading slash
-    this.#origin = origin
+    super(parts)
+    this.#origin = parts.origin
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -36,7 +35,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
 
   get origin(): string { return this.#origin }
   get href(): string { return this.toString() }
-  get rootPath(): RootPathUrl { return new RootPathUrl(urt.buildPath(this.pathParts)) }
+  get rootPath(): RootPathUrl { return new RootPathUrl(urt.partsToString(this.parts)) }
   toURL(): URL { return new URL(this.toString()) }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -46,15 +45,15 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   /////////////////////////////////////////////////////////////////////////////
 
   resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable)[]): this {
-    const { origin, ...parts } = urt.resolve(this.pathParts, args.filter(Boolean).map(String), { baseOrigin: this.#origin })
-    return this.cloneWithUrlString(`${origin}${urt.buildPath(parts)}`)
+    const parts = urt.resolve(this.parts, args.filter(Boolean).map(String))
+    return this.cloneWithParts(parts)
   }
 
   relativeTo(base: this): TRelative {
     if (this.#origin !== base.#origin) {
       throw new Error('Cannot compute relative path between URLs with different origins.')
     }
-    return new RelativePathUrl(this.nextPathString({ pathname: pth.relative(base.pathname, this.pathname) }))
+    return new RelativePathUrl(this.nextParts({ pathname: pth.relative(base.pathname, this.pathname) }))
   }
 
   descendsFrom(ancestor: this | string, opts?: { includeSelf?: boolean }): boolean {
@@ -96,7 +95,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
    *
    */
   static isFullPathUrlString(s: string): boolean {
-    return urt.parseUrl(s).kind === 'hierarchical'
+    return urt.analyzeUrl(s).kind === 'hierarchical'
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -109,10 +108,20 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
     return `${this.#origin}${super.toString()}`
   }
 
-  protected override cloneWithParts(params: Partial<UrlPathParts>): this {
-    const ctor = this.constructor as new(path: string) => this
-    const path = this.nextPathString(params)
-    return new ctor(`${this.#origin}${path}`)
+  protected override get parts(): UrlFullParts {
+    return {
+      ...super.parts,
+      origin: this.#origin,
+    }
+  }
+
+  protected override cloneWithParts(params: Partial<UrlFullParts>): this {
+    const { origin, ...parts } = params
+    const ctor = this.constructor as new(parts: UrlFullParts) => this
+    return new ctor({
+      origin: origin ?? this.#origin,
+      ...this.nextParts(parts),
+    })
   }
 
 }

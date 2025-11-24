@@ -1,6 +1,9 @@
 import type { AbsolutePathOps, JoinableBasic } from '../core'
 import type { RelativePath } from '../path'
 import { RelativePathUrl } from './relative-path-url'
+import type { AbsolutePath } from '../path'
+import type { UrlPathParts } from './url-types'
+import { isUrlPathParts } from './url-types'
 import { UrlBase } from './url-base'
 import { pth, urt } from '../tools'
 
@@ -10,11 +13,12 @@ type TResolveable = RootPathUrl
 
 
 export class RootPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<TRelative, TResolveable, TJoinable> {
-  constructor(path: string) {
-    if (!RootPathUrl.isRootPathUrlString(path)) {
-      throw new Error(`RootPathUrl must start with '/': ${path}`)
+  constructor(url: string | RootPathUrl | AbsolutePath | UrlPathParts) {
+    const parts = (url instanceof RootPathUrl) ? url.parts : isUrlPathParts(url) ? url : urt.parsePath(String(url))
+    if (!RootPathUrl.isRootPathUrlString(parts.pathname)) {
+      throw new Error(`RootPathUrl must start with '/': ${parts.pathname}`)
     }
-    super(path)
+    super(parts)
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -24,12 +28,12 @@ export class RootPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   /////////////////////////////////////////////////////////////////////////////
 
   resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable | null | undefined)[]): this {
-    const parts = urt.resolve(this.pathParts, args.filter(Boolean).map(String))
-    return this.cloneWithUrlString(urt.buildPath(parts))
+    const parts = urt.resolve(this.parts, args.filter(Boolean).map(String))
+    return this.cloneWithParts(parts)
   }
 
   relativeTo(base: this): TRelative {
-    return new RelativePathUrl(this.nextPathString({ pathname: pth.relative(base.pathname, this.pathname) }))
+    return new RelativePathUrl({ pathname: pth.relative(base.pathname, this.pathname) })
   }
 
   descendsFrom(ancestor: this | string, opts?: { includeSelf?: boolean }): boolean {

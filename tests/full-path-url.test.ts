@@ -1,19 +1,23 @@
 import { describe, it, expect } from 'vitest'
 import { FullPathUrl } from '$src'
+import { urlBasicTests } from './url-basic.shared-tests'
 
 
 describe('FullPathUrl', () => {
-  it('parses and exposes origin, pathname, query, fragment', () => {
-    const u = new FullPathUrl('https://x.com/foo/bar?a=1#frag')
-    expect(u.origin).toBe('https://x.com')
-    expect(u.pathname).toBe('/foo/bar')
-    expect(u.query).toEqual({ a: '1' })
-    expect(u.fragment).toBe('frag')
-    expect(u.href).toBe('https://x.com/foo/bar?a=1#frag')
-    expect(u.toString()).toBe('https://x.com/foo/bar?a=1#frag')
-  })
+  urlBasicTests({ make: s => new FullPathUrl(s), kind: 'full' })
 
   describe('constructor', () => {
+
+    it('parses and exposes origin, pathname, query, fragment', () => {
+      const u = new FullPathUrl('https://x.com/foo/bar?a=1#frag')
+      expect(u.origin).toBe('https://x.com')
+      expect(u.pathname).toBe('/foo/bar')
+      expect(u.query).toEqual({ a: '1' })
+      expect(u.fragment).toBe('frag')
+      expect(u.href).toBe('https://x.com/foo/bar?a=1#frag')
+      expect(u.toString()).toBe('https://x.com/foo/bar?a=1#frag')
+    })
+
 
     it('accepts URL objects', () => {
       const base = new URL('https://x.com/base/path?b=2#basefrag')
@@ -28,7 +32,7 @@ describe('FullPathUrl', () => {
       const u = new FullPathUrl('https://x.com')
       expect(u.origin).toBe('https://x.com')
       expect(u.pathname).toBe('/')
-      expect(u.query).toEqual({})
+      expect(u.query).toBeUndefined()
       expect(u.fragment).toBeUndefined()
     })
 

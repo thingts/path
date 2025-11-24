@@ -30,9 +30,9 @@ export function pathUrl(path: string | URL | FilenameOps | UrlBase<unknown>): Fu
 
   const s = String(path)
 
-  const parsed = urt.parseUrl(s)
+  const analyzed = urt.analyzeUrl(s)
 
-  if (parsed.kind !== 'invalid') {
+  if (analyzed.kind !== 'invalid') {
     return new FullPathUrl(s)
   }
 
