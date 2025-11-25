@@ -10,6 +10,7 @@ export function isUrlPathParts(obj: unknown): obj is UrlPathParts {
   if (typeof obj !== 'object' || obj === null) {
     return false
   }
+  if (obj instanceof URL) { return false } // don't be fooled!  looks similar but has different semantics
   const cast = obj as UrlPathParts
   if (typeof cast.pathname !== 'string') { return false }
   if (cast.query !== undefined && typeof cast.query !== 'object') { return false }

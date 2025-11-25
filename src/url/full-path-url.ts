@@ -4,6 +4,7 @@ import type { UrlFullParts } from './url-types'
 import { RelativePathUrl } from './relative-path-url'
 import { RootPathUrl } from './root-path-url'
 import { UrlBase } from './url-base'
+import { isUrlFullParts } from './url-types'
 import { pth, urt } from '../tools'
 
 type TRelative    = RelativePathUrl
@@ -18,7 +19,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   readonly #origin: string
 
   constructor(url: string | URL | FullPathUrl | UrlFullParts) {
-    const parts = url instanceof FullPathUrl ? url.parts : (typeof url === 'string' || url instanceof URL ) ? urt.parseFullUrl(String(url)) : url
+    const parts = url instanceof FullPathUrl ? url.parts : isUrlFullParts(url) ? url : urt.parseFullUrl(String(url))
     if (parts.pathname === '.') { parts.pathname = '/' }
     if (!pth.isAbsolute(parts.pathname)) {
       throw new Error(`FullPathUrl requires an absolute pathname. Got: '${parts.pathname}'`)

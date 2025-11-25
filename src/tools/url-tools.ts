@@ -56,15 +56,7 @@ function fragmentToString(f: string | undefined): string {
   return f === undefined ? '' : `#${encodeComponent(f)}`
 }
 
-export function mergeQueries(base: UrlQueryParams, override: UrlQueryParams): UrlQueryParams {
-  const result: UrlQueryParams = { ...base }
-  for (const [k, v] of Object.entries(override)) {
-    result[k] = (k in result) ? ([] as string[]).concat(result[k], v) : v
-  }
-  return result
-}
-
-export function normalizePathname(path: string): string {
+function normalizePathname(path: string): string {
   const trailingSlash = path.endsWith('/') && path !== '/'
   const pathNormalized = pth.normalize(path) 
   return pathNormalized === '' ? '.' : pathNormalized + (trailingSlash ? '/' : '')
@@ -200,7 +192,7 @@ export function parseFullUrl(s: string): UrlFullParts {
   }
 }
 
-export function urlParseError(analyzeResult: UrlAnalyzeResult, s: string): Error {
+function urlParseError(analyzeResult: UrlAnalyzeResult, s: string): Error {
   switch (analyzeResult.kind) {
     case 'opaque':
       return new Error(`URL is non-hierarchical: ${s}`)
