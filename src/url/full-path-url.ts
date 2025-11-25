@@ -70,9 +70,9 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   //
   /////////////////////////////////////////////////////////////////////////////
 
-  replaceOrigin(origin: string | FullPathUrl): FullPathUrl {
+  replaceOrigin(origin: string | FullPathUrl): this {
     const o = origin instanceof FullPathUrl ? origin.#origin : origin
-    return new FullPathUrl(`${o}${this.toString().replace(/^[^/]+\/\/[^/]+/, '')}`)
+    return this.cloneWithParts({ origin: o })
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -103,10 +103,6 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   // --- UrlBase Overrides ------------------------------------------------------------
   //
   /////////////////////////////////////////////////////////////////////////////
-
-  override toString(): string {
-    return `${this.#origin}${super.toString()}`
-  }
 
   protected override get parts(): UrlFullParts {
     return {

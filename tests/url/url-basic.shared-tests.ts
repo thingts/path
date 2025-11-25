@@ -70,6 +70,25 @@ export function urlBasicTests(params: { make: (s: string) => FullPathUrl | RootP
           expect(u.query).toEqual({ x: '1 2', y: '#z%' })
           expect(String(u)).toBe(stringify('/a?x=1%202&y=%23z%25'))
         })
+
+        it('encodes reserved characters in fragment', () => {
+          const u = makeUrl('a').replaceFragment('frag 1/#%')
+          expect(u.fragment).toBe('frag 1/#%')
+          expect(String(u)).toBe(stringify('/a#frag%201%2F%23%25'))
+        })
+
+        it('retains unencoded input in field values, encodes on stringify', () => {
+          const u = makeUrl('a/baz.txt').
+            replaceParent('/foo bar/').
+            replaceQuery({ 'a b': 'c d??' }).
+            replaceFragment('my fragment #1') 
+          expect(u.pathname).toBe(pathify('/foo bar/baz.txt'))
+          expect(u.query).toEqual({ 'a b': 'c d??' })
+          expect(u.fragment).toBe('my fragment #1')
+          expect(String(u)).toBe(stringify('/foo%20bar/baz.txt?a%20b=c%20d%3F%3F#my%20fragment%20%231'))
+          const v = make(String(u))
+          expect(String(v)).toBe(String(u))
+        })
       })
 
       describe('dot-segment normalization', () => {

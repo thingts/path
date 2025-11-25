@@ -139,9 +139,10 @@ export function resolve(cur: UrlPathParts, segments: readonly (string | null | u
   return joinOrResolve(cur, segments, { mode: 'resolve', ...opts })
 }
 
-export function partsToString(params: UrlPathParts): string {
+export function partsToString(params: UrlPathParts | UrlFullParts): string {
   const { pathname, query, fragment } = params
-  return `${encodePathname(pathname)}${queryToString(query)}${fragmentToString(fragment)}`
+  const origin = 'origin' in params ? params.origin : ''
+  return `${encodePathname(`${origin}${pathname}`)}${queryToString(query)}${fragmentToString(fragment)}`
 }
 
 export function stripLeadingHash(s: string): string { return s.startsWith('#') ? s.slice(1) : s }
