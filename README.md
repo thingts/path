@@ -134,8 +134,8 @@ to absolute paths:
 // Absolute paths
 const path = new AbsolutePath('/foo/bar/baz.txt')
 
-path.resolve('more', 'files')                // →  AbsolutePath('/foo/bar/baz.txt/more/files') same as .join()
-path.resolve('more', '/other/path', 'files') // →  AbsolutePath('/other/path/files')
+path.resolve('more', 'files')                // → AbsolutePath('/foo/bar/baz.txt/more/files') same as .join()
+path.resolve('more', '/other/path', 'files') // → AbsolutePath('/other/path/files')
 path.descendsFrom('/foo')                    // → true
 path.relativeTo('/foo')                      // → RelativePath('bar/baz.txt')
 ```
@@ -350,8 +350,8 @@ alongside the path segments.
 
     ```ts
     const url    = new RootPathUrl('/foo/bar?x=1#frag')
-    const result = url.join('more', '/other/path?x=2&y=2#frag', 'final.txt#newfrag')
-            // → RootPathUrl('/foo/bar/more/other/path/final.txt?x=2&y=2#newfrag')
+    const result = url.join('more', '/other/path?x=2&y=2#fragB', 'final.txt#fragC')
+            // → RootPathUrl('/foo/bar/more/other/path/final.txt?x=2&y=2#fragC')
     ```
 
     It's not possible to remove an existing query parameter or the entire query or an existing framgent using `.join()`.

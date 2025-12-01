@@ -77,15 +77,4 @@ describe('Filename', () => {
     expect(f.toString()).toBe('example.txt')
   })
 
-  describe('Filename.isFilenameString', () => {
-    it('returns true for valid filenames', () => {
-      expect(Filename.isFilenameString('file.txt')).toBe(true)
-      expect(Filename.isFilenameString('another_file')).toBe(true)
-    })
-
-    it('returns false for filenames with path components', () => {
-      expect(Filename.isFilenameString('/path/to/file.txt')).toBe(false)
-      expect(Filename.isFilenameString('folder/file.txt')).toBe(false)
-    })
-  })
 })

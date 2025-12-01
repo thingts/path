@@ -141,6 +141,19 @@ export function stripLeadingHash(s: string): string { return s.startsWith('#') ?
 
 const hierarchicalSchemes = new Set(['http:', 'https:', 'ftp:', 'ftps:', 'ws:', 'wss:', 'file:'])
 
+function isHierarchicalScheme(scheme: string): boolean {
+  return hierarchicalSchemes.has(scheme.toLowerCase())
+}
+
+export function isHierarchicalOrigin(origin: string): boolean {
+  const m = `${origin}//x`.match(HierarchicalUrlRe)
+  if (!m) {
+    return false
+  }
+  const { scheme } = m.groups!
+  return scheme ? isHierarchicalScheme(scheme) : true
+} 
+
 const HierarchicalUrlRe = /^(?<origin>(?<scheme>[a-zA-Z][a-zA-Z0-9+\-.]*:)?\/\/(?<authority>[^/?#]*))(?<path>.*)$/
 const OpaqueUrlRe      = /^[a-zA-Z][a-zA-Z0-9+\-.]*:/
 
@@ -161,7 +174,7 @@ export function analyzeUrl(s: string): UrlAnalyzeResult {
       origin,
     }
   }
-  if (scheme && !hierarchicalSchemes.has(scheme.toLowerCase())) {
+  if (scheme && !isHierarchicalScheme(scheme)) {
     return {
       kind: 'opaque',
     }
@@ -212,4 +225,8 @@ function isValidOrigin(params: { scheme?: string, authority: string }): boolean 
   } catch {
     return false
   }
+}
+
+export function isRootPathUrlString(s: string): boolean {
+  return s.startsWith('/')
 }

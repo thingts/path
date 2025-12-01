@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { FullPathUrl } from '$src'
+import { FullPathUrl, RootPathUrl } from '$src'
 import { urlBasicTests } from './url-basic.shared-tests'
 
 
@@ -50,7 +50,9 @@ describe('FullPathUrl', () => {
     })
 
     it('throws on non-hierarchical URL', () => {
-      expect(() => new FullPathUrl('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')).toThrow(/non-hierarchical/)
+      expect(() => new FullPathUrl('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')).toThrow(/hierarchical/)
+      expect(() => new FullPathUrl(new URL('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ=='))).toThrow(/hierarchical/)
+      expect(() => new FullPathUrl({ origin: 'mailto:user@example.com', pathname: '/path' })).toThrow(/hierarchical/)
     })
 
     it('lowercases the origin', () => {
@@ -92,6 +94,21 @@ describe('FullPathUrl', () => {
     const v = u.replaceOrigin('https://b.com')
     expect(v.origin).toBe('https://b.com')
     expect(v.href).toBe('https://b.com/foo')
+  })
+
+  describe('convert to/from RootPathUrl', () => {
+    it('rootPath returns a RootPathUrl', () => {
+      const u = new FullPathUrl('https://x.com/foo/bar?a=1#frag')
+      const r = u.rootPath
+      expect(String(r)).toBe('/foo/bar?a=1#frag')
+    })
+
+    it('resolves FullPathUrl from RootPathUrl', () => {
+      const r = new RootPathUrl('/base/?a=1#frag')
+      const u = new FullPathUrl('https://x.com/')
+      const v = u.resolve(r)
+      expect(v.href).toBe('https://x.com/base/?a=1#frag')
+    })
   })
 })
 

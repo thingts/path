@@ -4,15 +4,16 @@ import { RelativePath } from './relative-path'
 import { pth } from '../tools'
 
 type TRelative = RelativePath
+
 type TJoinable = RelativePath
+
 type TResolveable = AbsolutePath
 
 /**
- * Represents an absolute filesystem path (i.e. a path starting at the root, i.e.
- * has a leading separator), and provides methods for path resolution,
- * manipulation and queries.
- *
- * {@link AbsolutePath} instances are normalized and immutable.
+ * Represents an absolute filesystem path (i.e. a path starting at the
+ * root, i.e.  has a leading separator), and provides methods for path
+ * resolution, manipulation and queries.  {@link AbsolutePath} instances
+ * are normalized and immutable.
  *
  * {@link AbsolutePath} has the same functionality as {@link RelativePath} but
  * with additional methods that are only valid for absolute paths: {@link
@@ -52,7 +53,7 @@ export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps
    */
   constructor(path: string | AbsolutePath) {
     path = String(path)
-    if (!AbsolutePath.isAbsolutePathString(path)) {
+    if (!pth.isAbsolute(path)) {
       throw new Error(`Path must be absolute: "${path}"`)
     }
     super(pth.resolve(path))
@@ -65,22 +66,13 @@ export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps
   /////////////////////////////////////////////////////////////////////////////
 
   /**
-   * Resolve additional path arguments against this absolute path.
-   *
-   * Accepts strings, {@link Filename}, {@link RelativePath}, or {@link AbsolutePath} objects.
-   * Null and undefined segments are ignored.
-   *
-   * Similar to join, except that if any argument is an {@link AbsolutePath} or string
-   * starting with a path separator, the current path is discarded and
-   * resolution starts from that segment.
-   *
-   * @returns A new {@link AbsolutePath} with the resolved path.
+   * {@inheritDoc <internal>!AbsolutePathOps#resolve}
    *
    * @example
    * ```ts
    * const p1 = new AbsolutePath('/project/demos')
-   * const p2 = p1.resolve('demo1/src', 'index.ts') // '/project/demos/demo1/src/index.ts'
-   * const p3 = p1.resolve('/etc/config') // '/etc/config' (resets to absolute path)
+   * const p2 = p1.resolve('demo1/src', 'index.ts')                // → AbsolutePath('/project/demos/demo1/src/index.ts')
+   * const p3 = p1.resolve('demo1/src', '/etc/config', 'index.ts') // → AbsolutePath('/etc/config/index.ts')
    * ```
    */
   resolve(...args: readonly (JoinableBasic | TJoinable | TResolveable)[]): this {
@@ -129,24 +121,6 @@ export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps
    */
   descendsFrom(ancestor: AbsolutePath | string, opts?: { includeSelf?: boolean }): boolean {
     return pth.descendsFrom(pth.resolve(String(ancestor)), this.path_, opts)
-  }
-
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  //  --- Static helpers ---
-  //
-  /////////////////////////////////////////////////////////////////////////////
-  
-
-   /**
-   * Checks whether a string is an absolute path.  (I.e., if it would be
-   * acceptable to the {@link AbsolutePath} constructor.)
-   *
-   * @param filepath - The string to check.
-   * @returns True if the string is an absolute path, otherwise false.
-   */
-  static isAbsolutePathString(filepath: string): boolean {
-    return pth.isAbsolute(filepath)
   }
 
 }

@@ -1,19 +1,20 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["src/index.ts"],
+  "entryPointStrategy": "expand",
   "exclude": ["**/*.test.ts", "**/__tests__/**"],
   "excludeInternal": true,
   "excludeNotDocumented": true,
   "excludeNotDocumentedKinds": ["Class", "Module"],
   "excludePrivate": true,
-  "includeHierarchySummary": false,
+  "includeHierarchySummary": true,
   "includeVersion": true,
   "name": "@thingts/path",
   "navigationLinks": {
     "github.com/thingts/path": "https://github.com/thingts/path"
   },
-  "out": "docs",
-  "plugin": ["typedoc-github-theme"],
+  "out": "build/docs",
+  "plugin": ["typedoc-github-theme", "typedoc-plugin-missing-exports"],
   "readme": "typedoc/readme.md",
   "theme": "typedoc-github-theme",
   "tsconfig": "tsconfig.json",

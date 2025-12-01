@@ -102,17 +102,4 @@ describe('AbsolutePath', () => {
     expect(p.toString()).toBe('/tmp/example.txt')
   })
 
-  describe('AbsolutePath.isAbsolutePathString', () => {
-    it('returns true for absolute paths', () => {
-      expect(AbsolutePath.isAbsolutePathString('/foo/bar/baz.txt')).toBe(true)
-    })
-
-    it('returns false for relative paths', () => {
-      expect(AbsolutePath.isAbsolutePathString('foo/bar/baz.txt')).toBe(false)
-      expect(AbsolutePath.isAbsolutePathString('./foo/bar/baz.txt')).toBe(false)
-      expect(AbsolutePath.isAbsolutePathString('../foo/bar/baz.txt')).toBe(false)
-      expect(AbsolutePath.isAbsolutePathString('plain')).toBe(false)
-    })
-  })
-
 })

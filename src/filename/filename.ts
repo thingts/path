@@ -2,7 +2,7 @@ import type { FilenameOps } from '../core'
 import { fnt } from '../tools'
 
 /**
- * Represents a filename, without any path components, an provides methods
+ * Represents a filename (without any path components), and provides methods
  * to query and manipulate it.
  *
  * The class is immutable; all methods that modify the filename return a
@@ -29,12 +29,12 @@ export class Filename implements FilenameOps {
    * @example
    * ```ts
    * new Filename('index.ts') // OK
-   * new Filename('demo/index.ts') // Throws Error
+   * new Filename('demo/index.ts') // ❌ Throws error
    * ```
    */
   constructor(filename: string | Filename) {
     filename = String(filename)
-    if (!Filename.isFilenameString(filename)) {
+    if (!Filename.#isFilenameString(filename)) {
       throw new Error(`Filename must not contain path components: "${filename}"`)
     }
     this.#filename = filename
@@ -77,7 +77,7 @@ export class Filename implements FilenameOps {
    * Returns true if the provided string is a valid filename (i.e. does not
    * contain any path separators)
    */
-  static isFilenameString(filename: string): boolean {
+  static #isFilenameString(filename: string): boolean {
     return filename === fnt.basename(filename)
   }
 

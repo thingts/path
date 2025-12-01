@@ -61,5 +61,9 @@ export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
   join(...segments: readonly (JoinableBasic | TJoinable)[]): this { return this.cloneWithPath((pth.join(this.path_, ...segments.filter(Boolean).map(String)))) }
 
   toString(): string                    { return this.path_ }
+
+  /**
+   * Returns true if this path equals the other path or path string.
+   */
   equals(other: string | this): boolean { return this.path_ === this.cloneWithPath(String(other)).path_ }
 }

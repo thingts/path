@@ -1,3 +1,6 @@
+/**
+ * Interface defining operations on objects that have filenames
+ */
 export interface FilenameOps {
 
   /**
@@ -8,7 +11,7 @@ export interface FilenameOps {
    * that dot is considered part of the stem.  So `.gitignore` has
    * extension `''` and `.gitignore.bak` has extension `.bak`
    */
-  get extension(): string | undefined
+  extension: string | undefined
 
   /**
    * Returns the stem of the filename, i.e. the part before the extension.
@@ -19,28 +22,31 @@ export interface FilenameOps {
    * `.gitignore.bak` both have stem `.gitignore`
    */
 
-  get stem(): string  | undefined
+  stem: string  | undefined
 
   /**
    * Replace the filename stem, keeping the extension the same
    *
-   * @returns A new {@link Filename} instance
+   * @returns A new instance with the filename stem replaced.
    *
    * @example
    * ```ts
-   * new Filename('index.ts').replaceStem('main') // 'main.ts' (Filename)
+   * new Filename('index.ts').replaceStem('main') // → Filename('main.ts')
    * ```
    */
   replaceStem(newStem: string): this
 
   /**
-   * Replace the filename extensions, keeping the stem the same
+   * Replace the filename extension, keeping the stem the same.  The passed
+   * string can include or omit the leading dot; if omitted, it will be added.
    *
-   * @returns A new {@link Filename} instance
+   * @param newExt - New extension, e.g. `json` or `.json`
+   *
+   * @returns A new instance with the filename extension replaced.
    *
    * @example
    * ```ts
-   * new Filename('index.ts').replaceExtension('.js') // 'index.js' (Filename)
+   * new Filename('file.txt').replaceExtension('json') // → Filename('file.json')
    * ```
    */
   replaceExtension(newExt: string): this
@@ -48,6 +54,6 @@ export interface FilenameOps {
   /** Returns the filename as string. */
   toString(): string
 
-  /** Returns true if this filename equals the other filename or string */
+  /** Returns true if this filename equals the other filename or filename string */
   equals(other: string | this): boolean
 }

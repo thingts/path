@@ -1,14 +1,15 @@
 import { pth } from '../tools'
 import { PathBase } from './path-base'
 
+/**
+ * @expand
+ */
 type Joinable = RelativePath
 
 /**
- * Represents a relative filesystem path (i.e. a path that doesn't start at
- * the root, i.e. doesn't have a leading separator) and is not, and provides
- * methods for path manipulation and queries.
- *
- * {@link RelativePath} instances are normalized and immutable.
+ * Represents a relative path (i.e. a path that doesn't start at the root,
+ * i.e. doesn't have a leading separator), and provides methods for path
+ * manipulation and queries.
  *
  * {@link RelativePath} is similar to {@link AbsolutePath} but
  * lacks methods that are only valid for absolute paths.
@@ -28,13 +29,13 @@ export class RelativePath extends PathBase<Joinable> {
    * The path is normalized and guaranteed to be relative. Any trailing
    * separator is removed.
    *
-   * Throws an error if the provided path is absolute
+   * @throws Throws an error if the provided path is absolute
    *
    * @example
    * ```ts
-   * new AbsolutePath('project/demos')   // OK
-   * new AbsolutePath('/project/demos')  // Throws Error
-   * new AbsolutePath('project//src/../demos/') // normalized => project/demos
+   * new RelativePath('project/demos')
+   * new RelativePath('/project/demos')         // ❌ Throws error: path must be relative
+   * new RelativePath('project//src/../demos/') // → AbsolutePath('project/demos')
    * ```
    */
   constructor(relpath: string | RelativePath) {
@@ -56,7 +57,7 @@ export class RelativePath extends PathBase<Joinable> {
    * acceptable to the {@link RelativePath} constructor.)
    *
    * @param filepath - The string to check.
-   * @returns True if the string is an absolute path, otherwise false.
+   * @returns `true` if the string is an absolute path, otherwise false.
    */
   static isRelativePathString(filepath: string): boolean {
     return !pth.isAbsolute(filepath)

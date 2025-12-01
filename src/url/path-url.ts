@@ -36,7 +36,7 @@ export function pathUrl(path: string | URL | FilenameOps | UrlBase<unknown>): Fu
     return new FullPathUrl(s)
   }
 
-  if (RootPathUrl.isRootPathUrlString(s)) {
+  if (urt.isRootPathUrlString(s)) {
     return new RootPathUrl(s)
   }
 

@@ -1,8 +1,14 @@
 import type { Filename } from '../filename'
 import type { FilenameOps } from './filename-ops'
 
+/**
+ * @inline
+ */
 export type JoinableBasic = string | Filename | null | undefined
 
+/**
+ * Operations available on path-like objects.
+ */
 export interface PathOps<TJoinable = never> extends FilenameOps {
 
   /////////////////////////////////////////////////////////////////////////////
@@ -16,33 +22,34 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
    *
    * @example
    * ```ts
-   * new AbsolutePath('/a/b/c.txt').filename // 'c.txt' (Filename)
-   * new RelativePath('a/b/c.txt').filename  // 'c.txt' (Filename)
+   * new AbsolutePath('/a/b/c.txt').filename // Filename('c.txt')
+   * new RelativePath('a/b/c.txt').filename  // Filename('c.txt')
    * ```
    */
-  get filename(): Filename | undefined
+  filename: Filename | undefined
 
   /**
    * The parent directory of this path.
    *
-   * @returns A new path instance pointing to the parent.
+   * @returns A new instance pointing to the parent.
    * @example
    * ```ts
-   * new AbsolutePath('/a/b/c.txt').parent // '/a/b' (AbsolutePath)
-   * new RelativePath('a/b/c.txt').parent  // 'a/b' (RelativePath)
+   * new AbsolutePath('/a/b/c.txt').parent // AbsolutePath('/a/b')
+   * new RelativePath('a/b/c.txt').parent  // RelativePath('a/b')
    * ```
    */
-  get parent(): this
+  parent: this
 
   /**
    * The segments of this path as an array of strings.
    * @example
+   *
    * ```ts
    * new AbsolutePath('/a/b/c.txt').segments // ['a', 'b', 'c.txt']
    * new RelativePath('a/b/c.txt').segments  // ['a', 'b', 'c.txt']
    * ```
    */
-  get segments(): string[]
+  segments: string[]
 
   /////////////////////////////////////////////////////////////////////////////
   //
@@ -54,19 +61,22 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
   /**
    * Join additional path segments to this path.
    *
-   * Accepts strings, filenames, or path objects; `null` and `undefined` are accepted and ignored.
+   * Accepts relative path objects and {@link Filename} segment arguments
+   * for type safety, but you can also directly pass strings for
+   * convenience.   All args are stringified and interpreted as segments to
+   * be joined, regardless of whether they start with a path separator.
    *
-   * @returns A new path instance with the segments appended
+   * Any `null`, `undefined`, or empty segments are ignored.
+   *
+   * @returns A new instance with the segments appended and resulting path normalized.
    *
    * @example
    * ```ts
    * const a1 = new AbsolutePath('/project/demo')
-   * const a2 = a1.join('demo1/src', 'index.js') // '/project/demo/demo1/src/index.js'
-   * a2 instanceof AbsolutePath // true
+   * const a2 = a1.join('demo1/src', 'index.js') // → AbsolutePath('/project/demo/demo1/src/index.js')
    *
    * const r1 = new RelativePath('demo')
-   * const r2 = r1.join('demo1/src', 'index.js') // 'demo/demo1/src/index.js'
-   * r2 instanceof RelativePath // true
+   * const r2 = r1.join('demo1/src', 'index.js') // → RelativePath('demo/demo1/src/index.js')
    * ```
    */
   join(...segments: readonly (JoinableBasic | TJoinable)[]): this 
@@ -74,29 +84,30 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
   /**
    * Replace the filename (last segment).
    *
-   * @returns A new path with the filename replaced.
+   * @returns A new instance with the filename replaced.
+   *
+   * @example
+   * ```ts
+   * new AbsolutePath('/a/b/c.txt').replaceFilename('d.json') // → AbsolutePath('/a/b/d.json')
+   * new RelativePath('a/b/c.txt').replaceFilename('d.json')  // → RelativePath('a/b/d.json')
+   * ```
    */
   replaceFilename(newFilename: string | Filename): this
 
  /**
-   * Replace the filename stem, keeping the extension the same
+   * {@inheritDoc <internal>!FilenameOps#replaceStem}
    *
-   * @param newStem - New stem to use (extension is preserved).
-   * @returns A new path with the stem replaced.
    * @example
    * ```ts
-   * new AbsolutePath('/a/b/c.txt').replaceStem('d') // '/a/b/d.txt' (AbsolutePath)
-   * new RelativePath('a/b/c.txt').replaceStem('d')  // 'a/b/d.txt' (RelativePath)
+   * new AbsolutePath('/a/b/c.txt').replaceStem('d') // → AbsolutePath('/a/b/d.txt')
+   * new RelativePath('a/b/c.txt').replaceStem('d')  // → RelativePath('a/b/d.txt')
    * ```
    */
   replaceStem(newStem: string): this 
 
   /**
-   * Replace the filename extension, keeping the stem the same.  The passed
-   * can include or omit the leading dot; if omitted, it will be added.
+   * {@inheritDoc <internal>!FilenameOps#replaceExtension}
    *
-   * @param newExt - New extension, e.g. `json` or `.json`
-   * @returns A new path with the extension replaced.
    * @example
    * ```ts
    * new AbsolutePath('/a/b/c.txt').replaceExtension('json') // '/a/b/c.json' (AbsolutePath)
@@ -110,7 +121,7 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
    *
    * @param fn - Receives the current {@link Filename}, returns a new filename
    *             (string or {@link Filename}).
-   * @returns A new path with the transformed filename.
+   * @returns A new instance with the transformed filename.
    * @example
    * ```ts
    * p.transformFilename(f => String(f).toUpperCase())
@@ -119,9 +130,9 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
   transformFilename(fn: (filename: Filename) => string | Filename): this
 
   /**
-   * Replace the parent directory while keeping the current filename.
+   * Replace the entire directory path through the parent, while keeping the current filename.
    *
-   * @param newParent - Parent directory as string or another `PathBase`.
+   * @param newParent - Parent directory as string or another path
    * @returns A new path rooted at `newParent` with the same filename.
    * @example
    * ```ts
@@ -131,4 +142,8 @@ export interface PathOps<TJoinable = never> extends FilenameOps {
    */
   replaceParent(newParent: string | this): this
 
+  /**
+   * @returns Returns the string representation of this path.
+   */
+  toString(): string
 }
