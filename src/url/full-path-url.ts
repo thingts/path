@@ -22,7 +22,7 @@ type TResolveable = RootPathUrl | FullPathUrl
  * schemes"](https://url.spec.whatwg.org/#special-scheme): `http://`,
  * `https://`, `ftp://`, `ftps://`, `ws://`, `wss://`, and `file://`.
  *
- * Analogous to {@AbsolutePath} but for Full URLs, i.e. it has an origin
+ * Analogous to {@link AbsolutePath} but for Full URLs, i.e. it has an origin
  * (e.g. `https://example.com:8080`) and may have query parameters and a
  * fragment, and has methods to work with them.
  *
