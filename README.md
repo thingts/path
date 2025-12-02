@@ -11,25 +11,22 @@ Type-safe, ergonomic package for working with paths and filenames, both plain an
 
 ## Why?
 
-Instead of tedious and error-prone juggling raw strings with `indexOf()`, `slice()`,
-regexes, or [node:path](https://nodejs.org/api/path.html), this package
-provides ergonomic, semantically meaningful types for file paths and
-URL paths.
+Working with raw path strings (`indexOf()`, `slice()`, regexes, or `node:path`) is tedious, brittle, and hard to read.  This package provides type‑safe, expressive objects that support concepts like filenames, extensions, parents, joins, and URL semantics.
 
 ## Features
 
-* Pure typescript, no dependencies on node.js or other runtimes
-* Immutable, chainable path objects with type-safe operations
-* All paths are normalized on construction
-* Easy access to path parts (filename, stem, extension, parent)
-* Path transformations (replace stem/extension/parent, transform filename, etc)
-* Path navigation (join, resolve, relativeTo, descendsFrom, etc)
+- Pure TypeScript — no Node.js dependencies  
+- Immutable, chainable path objects  
+- POSIX-style normalization (`.`, `..`, repeated slashes) on construction
+- Rich filename operations (stem, extension, transforms)  
+- Type‑safe path navigation (`join`, `resolve`, `relativeTo`, `descendsFrom`)  
+- Robust URL support with query/fragment manipulation and percent‑encoding  
 
-Together these features give you a safer, more expressive way to work with file, directory, and URL paths.
-
-> ⚠️ Currently only POSIX-style paths are supported (e.g. `/foo/bar`).
+For complete docs, see the [API Reference](https://thingts.github.io/path)
 
 > 💡 This package does not do any filesystem access, it is only for manipulating path strings.  For filesystem access, see [`@thingts/fs-path`](https://github.com/thingts/fs-path) which builds on this package.
+
+---
 
 ## Installation
 
@@ -37,397 +34,168 @@ Together these features give you a safer, more expressive way to work with file,
 npm install @thingts/path
 ```
 
-## Overview
+---
 
-A path is essentially a collection of segments separated by slashes.  Paths
-can be either:
+## Classes Overview
 
-* *absolute* - beginning with a slash, e.g. `/foo/bar`
-* *relative* - not beginning with a slash, e.g. `foo/bar`
+| Class | Path Type | Notes |
+|-------|-----------|-------|
+| `Filename` | *filename* | plain |
+| `RelativePath` | *relative* | plain |
+| `AbsolutePath` | *absolute* | plain |
+| `RelativePathUrl` | *relative* | URL |
+| `RootPathUrl` | *absolute* | URL |
+| `FullPathUrl` | *absolute* | URL |
 
-The last component of a path is referred to as its *filename* (e.g. `baz.txt` in
-`/foo/bar/baz.txt`), which can be further separated into a *stem* and
-optional *extension* (e.g. `baz` and `.txt`).
+All classes:
 
-**@thingts/path** provides the following classes:
+- Are **immutable**  
+- Expose `.toString()` and `.equals()`  
+
+All path classes:
+
+- Normalize appropriately on construction  
+- Provide `.filename`, `.stem`, `.extension`, `.parent`, `.join()`, etc.
+
+All absolute path classes:
+
+- Provide `.resolve()`, `.relativeTo()`, `.descendsFrom()`, etc.
+
+URL classes add:
+
+- URL-safe normalization
+- Query and fragment support
+- Percent‑encoding on stringification
+- Directory-awareness via trailing slash  
+- Origin (`scheme://host:port`) support & conversion to/from native URL objects (in `FullPathUrl`)
+
+> 💡 This package provides support only for URLs that have paths — specifically the ["special schemes"](https://url.spec.whatwg.org/#special-scheme): `http://`, `https://`, `ftp://`, `ftps://`, `ws://`, `wss://`, and `file://`.  Other schemes (e.g. `mailto:`, `data:`, `javascript:`) are not supported and will throw an error.  (See also [RFC 3986 Section 3.3](https://www.rfc-editor.org/rfc/rfc3986#section-3.3))
+
+---
+
+## Examples
+
+Some examples illustrating common accessors and methods.  For complete docs, see the [API Reference](https://thingts.github.io/path/)
 
 
-| Class Name  | Path Behavior | Type
-|--|--|--
-| `Filename` | *filename* | plain
-| `RelativePath` | *relative* |  plain
-| `RelativePathUrl` | *relative* | URL 
-| `AbsolutePath` | *absolute* | plain
-| `RootPathUrl` | *absolute* | URL
-| `FullPathUrl` | *absolute* | URL with origin
+### Working with filenames
 
-All classes are immutable.  All classes are automatically normalized on
-construction: repeated slashes are merged, and `.` and `..` components are
-resolved.  All classes have a `.toString()` method that returns the string
-representation of the path in canonical form, and a `.equals()` method for
-comparing against another path of the same type or a string.
-
-See the sections below for discussion of each behavior, and see
-[PathURLs](#pathurls) below for discussion of URL paths.
-
-For complete docs, see the [API Reference](https://thingts.github.io/path).
-
-Note, the non-URL path classes are normalized according to POSIX rules, with
-trailing slashes removed.  See below for discussion of URL paths.
-
-### Filename
-
-All the path classes have a `.filename` property that returns a `Filename`
-object.  The filename class has properties for accessing the `stem` and
-`extension`, and methods for transforming them.
+All classes have filename features, e.g.:
 
 ```ts
-// Example using `AbsolutePath` but same API for all path classes
-const path = new AbsolutePath('/foo/bar/baz.txt')
+const p = new AbsolutePath('/foo/bar/baz.txt')
 
-path.filename                // → Filename('baz.txt')
-path.stem                    // → 'baz'  -- shorthand for path.filename.stem
-path.extension               // → '.txt' -- shorthand for path.filename.extension
-path.replaceStem('report')   // → AbsolutePath('/foo/bar/report.txt')
-path.replaceExtension('.md') // → AbsolutePath('/foo/bar/report.md')
+p.filename.toString()       // → 'baz.txt'
+p.stem                      // → 'baz'
+p.extension                 // → '.txt'
+p.replaceStem('report')     // → AbsolutePath('/foo/bar/report.txt')
+p.replaceExtension('.md')   // → AbsolutePath('/foo/bar/baz.md')
 ```
 
 ### Relative Paths
 
-There are two kinds of relative paths:  `RelativePath` and
-`RelativePathUrl`.  In addition to the filename methods, they support path
-manipulation and navigation methods:
+Relative paths don't start with a slash.  They have all the filename
+features plus path navigation and manipulation methods, e.g.:
 
 ```ts
-// Example using `RelativePath` but same API for `RelativePathUrl`
-const path = new RelativePath('foo/bar/baz.txt')
+const p = new RelativePath('foo/bar/baz.txt')
 
-path.segments                // → ['foo', 'bar', 'baz.txt']
-path.parent                  // → RelativePath('foo/bar')
-path.replaceParent('other')  // → RelativePath('other/baz.txt')
-path.join('more', 'files')   // → RelativePath('foo/bar/baz.txt/more/files')
+p.segments                  // → ['foo', 'bar', 'baz.txt']
+p.parent                    // → RelativePath('foo/bar')
+p.join('more/files')        // → RelativePath('foo/bar/baz.txt/more/files')
 ```
 
-Note that the `.join()` method accepts Filename or relative path arguments
-for type safety, but you can also pass strings for convenience.  In the
-case of strings, they are interpreted as relative paths or filenames
-regardless of whether they start with leading slashes or url schemes, with
-the results being normalized.  e.g.
+### Absolute Paths
+
+Absolute paths start with a slash.  They have all the features of relative
+paths, plus extra methods for working with absolute paths, e.g.:
 
 ```ts
-const path = new RelativePath('foo/bar')
-const abs  = new AbsolutePath('/more/files')
+const p = new AbsolutePath('/foo/bar/baz.txt')
 
-path.join(abs)           // ❌ Typescript error
-path.join('/more/files') // → RelativePath('foo/bar/more/files')
+p.resolve('more')           // → AbsolutePath('/foo/bar/baz.txt/more')
+p.resolve('/other/x')       // → AbsolutePath('/other/x')
+p.relativeTo('/foo')        // → RelativePath('bar/baz.txt')
+p.descendsFrom('/foo')      // → true
 ```
 
-### AbsolutePaths
+### Constructing URL paths from strings or components
 
-There are three kinds of absolute paths:  `AbsolutePath`, `RootPathUrl`,
-and `FullPathUrl`.  In addition to the filename and relative path methods,
-they provide a `.resolve()` method which is similar to `.join()`, but
-accepts absolute paths as overrides, plus some additional methods specific
-to absolute paths:
+All URL path classes can be constructed from a URL string or from components:
 
 ```ts
-// Absolute paths
-const path = new AbsolutePath('/foo/bar/baz.txt')
+const u1 = new RelativePathUrl('foo/bar?a=1#frag')
+u1.pathname               // → '/foo/bar'
 
-path.resolve('more', 'files')                // → AbsolutePath('/foo/bar/baz.txt/more/files') same as .join()
-path.resolve('more', '/other/path', 'files') // → AbsolutePath('/other/path/files')
-path.descendsFrom('/foo')                    // → true
-path.relativeTo('/foo')                      // → RelativePath('bar/baz.txt')
-```
+const u2 = new RootPathUrl('/foo/bar?a=1#frag')
+u2.pathname               // → '/foo/bar'
 
----
-
-### Path URLs<a name="pathurls"></a>
-
-
-In addition to plain paths, **@thingts/path** also provides classes
-for working with the kinds of URLs that have paths, also known as [URIs with hierarchical
-schemes](https://www.rfc-editor.org/rfc/rfc3986#section-1.2.3)): `http://`,
-`https://`, `ftp://`, `ftps://`, `ws://`, `wss://`, and `file://`
-
-* `FullPathUrl` - A complete URL having origin, pathname, and optional query parameters and fragment, e.g. `https://example.com/foo/bar?query=1#fragment`
-* `RootPathUrl` - A root-relative URL having pathname beginning with '/', and optional query parameters and fragment, e.g.  `/foo/bar?query=1#fragment`
-* `RelativePathUrl` - A relative URL having pathname not beginning with '/', and optional query parameters and fragment, e.g.  `foo/bar?query=1#fragment`
-
-URL path classes can be constructed from strings (which will be parsed to
-extract the components), or from components directly:
-
-```ts
-const url1 = new FullPathUrl('https://example.com:8080/foo/bar/baz.txt?query=1#frag')
-const url2 = new FullPathUrl({
-  origin: 'https://example.com:8080',
-  pathname: '/foo/bar/baz.txt',
-  query: { query: '1' },
+const u3 = new FullPathUrl({
+  origin: 'https://example.com',
+  pathname: '/foo/bar',
+  query: { a: '1' },
   fragment: 'frag'
 })
+u3.pathname               // → '/foo/bar'
 ```
 
-The URL path classes inherit all the same path manipulation methods
-described above, but with URL-specific normalization, and added support for
-origins, queries, fragments, directory paths, and URL-specific join/resolve
-behavior.  See discussions below, and complete details at the [API
-Reference](https://thingts.github.io/path).
-
-
-#### URL Normalization & Percent-Encoding
-
-On construction, URL path classes normalize the path and origin:
-
-* As with plain paths, repeated slashes are merged, and `.` and `..` components are resolved.
-* Unlike plain paths, trailing slashes are preserved to indicate directory paths (see below).
-* In `FullPathUrl`, the origin is normalized to lowercase scheme and host.
-* Percent-encoded characters in the origin and pathname are *not* decoded, they are preserved as-is.
-
-When converting to a string, the result is encoded as needed:
-* Illegal characters in the pathname, query, or fragment are percent-encoded.
-* Existing percent-encoded characters in the pathname, query, or fragment are preserved as-is (not double-encoded).
+### URL pathname handling
 
 ```ts
-// Example using FullPathUrl.  Same API for RootPathUrl and RelativePathUrl, but without origin
-const url = new FullPathUrl({
-    origin: 'HTTPS://Example.com:8080',
-    pathname: '/foo bar/baz.txt',
-    query: { 'a b': 'c d??' },
-    fragment: 'my fragment #1'
-    })
-
-url.origin   // → 'https://example.com:8080'
-url.pathname // → '/foo bar/baz.txt'
-url.query    // → { 'a b': 'c d??' }
-url.fragment // → 'my fragment #1'
-url.toString() // → 'https://example.com:8080/foo%20bar/baz.txt?a%20b=c%20d%3F%3F#my%20fragment%20%231'
+new RootPathUrl('/foo/bar/').isDirectory   // → true
+new RootPathUrl('/foo/bar').filename       // → Filename('bar')
+new RootPathUrl('/foo/bar/').unDirectory() // → RootPathUrl('/foo/bar')
 ```
 
-#### URL pathname -- directory vs non-directory paths
-
-Unlike the plain path classes, URL path classes do not automatically remove
-trailing slashes from pathnames, since in URLs a trailing slash is
-significant -- it nominally signifies a directory (e.g.
-`http://example.com/foo/bar/`) vs a file or resource.
-
-If a URL path's pathname ends with a slash, it is considered a *directory*,
-and its filename is undefined.  If it does not end with a slash, its final
-segment is considered the filename, same as for plain paths.
-
-URL paths have the following extra properties and behaviors for working
-with directory paths:
+### Queries
 
 ```ts
-// Example using RootPathUrl, same API for all other PathUrl classes
+const u = new RootPathUrl('/foo?a=1&b=2')
 
-const url1 = new RootPathUrl('/foo/bar/') // directory path
-url1.isDirectory   // → true
-url1.filename      // → undefined
-url1.stem          // → undefined
-url1.extension     // → undefined
-url1.segments      // → ['foo', 'bar']
-url1.parent        // → RootPathUrl('/foo/')
-url1.unDirectory() // → RootPathUrl('/foo/bar')
-url1.join('baz/')  // → RootPathUrl('/foo/bar/baz/')
-url1.join('baz')   // → RootPathUrl('/foo/bar/baz')
-
-const url2 = new RootPathUrl('/foo/bar')  // file path
-url2.isDirectory         // → false
-url2.filename            // → Filename('bar')
-url2.stem                // → 'bar'
-url2.extension           // → ''
-url2.segments            // → ['foo', 'bar']
-url2.parent              // → RootPathUrl('/foo/')
-url2.join('/')           // → RootPathUrl('/foo/bar/')
+u.query                     // → { a: '1', b: '2' }
+u.mergeQuery({ a: '9' })    // → RootPathUrl('/foo?a=9&b=2')
+u.replaceQuery({ q: 'x' })  // → RootPathUrl('/foo?q=x')
+u.removeQuery()             // → RootPathUrl('/foo')
 ```
 
-Note that `.parent` always returns a directory path, and that joining with
-a trailing slash creates a directory path.   `.unDirectory()` can be used
-to convert a directory path to a file path by removing the trailing slash.
-
-#### URL Queries
-
-In a URL string, the query string is the part after the `?`, used to specify a set of key-value parameters.
-PathURL classes provide access to the query parameters via the `.query`
-property, and methods for modifying them immutably.  
-
-Note there is a distinction between an *empty query* (the URL string has a
-`?` but no parameters) and *no query* (the URL string has no `?`):
+### Fragments
 
 ```ts
-// Example using RelativePathUrl, API is the same for all Path URl classes
-const url1 = new RelativePathUrl('foo/bar?key=value1&key=value2&other=val')
-url1.query // → { key: ['value1', 'value2'], other: 'val' }
+const u = new RootPathUrl('/foo#frag')
 
-const url2 = new RelativePathUrl('foo/bar?')
-url2.query // → {}
-
-const url3 = new RelativePathUrl('foo/bar')
-url3.query // → undefined
+u.fragment                  // → 'frag'
+u.replaceFragment('x')      // → RootPathUrl('/foo#x')
+u.replaceFragment('#x')     // → RootPathUrl('/foo#x')
+u.removeFragment()          // → RootPathUrl('/foo')
 ```
 
-There are three operations for modifying the query, each as usual returns a
-new immutable PathURL object:
-
-* `.replaceQuery(obj)` - removes all existing query parameters and replaces them with `obj`
-
-* `.mergeQuery(obj)` - overwrites the values of the existing query for whichever keys are given in `obj`.
-
-    If there is no current query, or if the current query is empty,
-    `.mergeQuery(obj)` has the same effect as `.replaceQuery(obj)`
-
-    Merging new values by combining them with existing values in an array-valued key must be
-    done manually, e.g.: `url.mergeQuery({ key: [...url.query.key, 'newvalue'] })`
-
-* `.removeQuery()` - removes the query entirely (sets it to `undefined`)
-
-e.g.:
+### join() and resolve() with query and fragment support
 
 ```ts
-// Example using `RootPathUrl`, API is the same for all other Path URL classes
-const url = new RootPathUrl('/foo/bar?query=1#frag')
+const u = new RootPathUrl('/foo?a=1#x')
 
-url.query                       // → { query: '1' }
-url.mergeQuery({ query: '2' })  // → RootPathUrl('/foo/bar?query=2')
-url.mergeQuery({ page: '3' })   // → RootPathUrl('/foo/bar?query=1&page=3')
-url.replaceQuery({ page: '3' }) // → RootPathUrl('/foo/bar?page=3')
-url.replaceQuery({})            // → RootPathUrl('/foo/bar?')
-url.removeQuery()               // → RootPathUrl('/foo/bar')
+u.join('bar?b=2#y')     // → RootPathUrl('/foo/bar?a=1&b=2#y')
+u.resolve('/reset?z=3') // → RootPathUrl('/reset?z=3')
 ```
 
-
-#### URL Fragments
-
-In a URL string, the fragment is the trailing part of the string, after the '#'.
-
-Note there is a distinction between an *empty fragment* (i.e. URL ends with '#') and *no fragment* (i.e. URL has no '#' after the path):
+### FullPathUrl — full URL with origin
 
 ```ts
-// Example using RelativePathUrl, API is the same for all Path URl classes
-const url1 = new RelativePathUrl('foo/bar#frag')
-url1.fragment // → 'frag'
+const u = new FullPathUrl('https://EXAMPLE.com:8080/foo?a=1#frag')
 
-const url2 = new RelativePathUrl('foo/bar#')
-url2.fragment // → ''
+u.origin                     // → 'https://example.com:8080'
+u.replaceOrigin('http://x')  // → FullPathUrl('http://x/foo')
 
-const url3 = new RelativePathUrl('foo/bar')
-url3.fragment // → undefined
+u.toUrl()       // → URL('https://example.com:8080/foo?a=1#frag')
+u.href          // → 'https://example.com:8080/foo?a=1#frag'
+u.join('bar')   // → FullPathUrl('https://example.com:8080/foo/bar?a=1#frag')
+u.rootPath      // → RootPathUrl('/foo?a=1#frag')
+
+const r = new RootPathUrl('/bar')
+new FullPathUrl('https://example.com').join(r) // → FullPathUrl('https://example.com/bar')
 ```
-
-There are two operations for modifying the fragment, each as usual returning a
-new immutable PathURL object:
-
-* `.replaceFragment(str)` - sets the fragment to the given string (can be
-  an empty string).  As a convenience, `.replaceFragment(str)` will strip off a
-  single leading `#` from the string.  If you actually want to have a
-  fragment that starts with a `#`, put an additional `#` in front.
-
-* `.removeFragment()` - removes the fragment entirely (sets it to `undefined`)
-
-```ts
-// Example using `RootPathUrl`, API is the same for all other Path URL classes
-const url = new RootPathUrl('/foo/bar#frag')
-
-url.replaceFragment('newFrag')     // → RootPathUrl('/foo/bar#newFrag')
-url.replaceFragment('#newFrag')    // → RootPathUrl('/foo/bar#newFrag')
-url.replaceFragment('##extraHash') // → RootPathUrl('/foo/bar##extraHash')
-url.replaceFragment('')            // → RootPathUrl('/foo/bar#')
-url.replaceFragment('#')           // → RootPathUrl('/foo/bar#')
-url.removeFragment()               // → RootPathUrl('/foo/bar')
-```
-
-#### URL `join()` & `resolve()`
-
-The `.join()` and `.resolve()` methods on URL path classes work the same as
-for plain paths, but they additionally handle queries and fragments
-alongside the path segments.
-
-* `join(args)` - 
-
-    As the args are processed, any query parameters encountered are merged
-    into the resulting URL's query using the semantics of `.mergeQuery()`,
-    and any fragment replaces the current fragment.  For example:
-
-    ```ts
-    const url    = new RootPathUrl('/foo/bar?x=1#frag')
-    const result = url.join('more', '/other/path?x=2&y=2#fragB', 'final.txt#fragC')
-            // → RootPathUrl('/foo/bar/more/other/path/final.txt?x=2&y=2#fragC')
-    ```
-
-    It's not possible to remove an existing query parameter or the entire query or an existing framgent using `.join()`.
-
-* `resolve(args)` (only for RootPathUrl and FullPathUrl)
-
-    As the args are processed, if a root-relative path is encountered, the
-    current query and fragment are discarded and replaced by those of the
-    new path (if it has any).
-
-    In the case of `FullPathUrl`, if an arg is a full URL it will replace
-    the entire current URL.  For example:
-
-    ```ts
-    const url    = new RootPathUrl('/foo/bar?x=1#frag')
-    const result = url.resolve('more', '/other/path?x=2&y=2#frag', 'final.txt#newfrag')
-            // → RootPathUrl('/other/path/final.txt?x=2&y=2#newfrag')
-
-    const fullUrl = new FullPathUrl('https://example.com/foo/bar?x=1#frag')
-    const result2 = fullUrl.resolve('more', 'https://other.com/other/path?z=3', 'again')
-            // → FullPathUrl('https://other.com/other/path/again?z=3')
-    ```
-
-#### FullPathUrl
-
-`FullPathUrl` has a few extra features:
-
-* The constructor verifies that the given scheme is one of the hierarchical schemes 
-  (`http://`,
-  `https://`, `ftp://`, `ftps://`, `ws://`, `wss://`, and `file://`); it
-  will throw an error if given any other scheme (e.g.  `mailto:`,`data:`,
-  etc).
-
-  ```ts
-  const url = new FullPathUrl('mailto:user@example.com') // ❌ throws Error: Invalid URL scheme 'mailto:'
-  ```
-
-* The constructor accepts native URL objects in addition to as strings and component
-
-  ```ts
-  const url = new FullPathUrl(new URL("https://example.com/foo/bar")) // → FullPathUrl('https://example.com/foo/bar')
-  ```
-
-* `origin` - access and modify:
-
-    ```ts
-    const url = new FullPathUrl('https://example.com:8080/foo/bar/baz.txt')
-    url.origin                           // → 'https://example.com:8080'
-    url.replaceOrigin('wss://other.com') // → FullPathUrl('wss://other.com/foo/bar/baz.txt')
-    ```
-
-* `toURL()` - returns a native URL object:
-
-    ```ts
-    const url = new FullPathUrl('https://example.com:8080/foo/bar/baz.txt?query=1#frag')
-    url.toUrl() // → URL object: new URL('https://example.com:8080/foo/bar/baz.txt?query=1#frag')
-    ```
-
-* `.href` - As a convenience, an alias for `toString()`
-
-    ```ts
-    const url = new FullPathUrl('https://example.com:8080/foo/bar/baz.txt?query=1#frag')
-    url.href // -> 'https://example.com:8080/foo/bar/baz.txt?query=1#frag'
-    ```
-
-* `.rootPathUrl` - return a `RootPathUrl` instance that is the same as this
-   but without the origin:
-
-    ```ts
-    const url = new FullPathUrl('https://example.com:8080/foo/bar/baz.txt?query=1#frag')
-    url.rootPathUrl // → RootPathUrl('/foo/bar/baz.txt?query=1#frag')
-    ```
-
 
 ---
-
 
 
 ## Related
@@ -441,3 +209,4 @@ Contributions are welcome!
 
 As usual: fork the repo, create a feature branch, and open a
 pull request, with tests and docs for any new functionality.  Thanks!
+
