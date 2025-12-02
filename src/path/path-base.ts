@@ -14,6 +14,8 @@ export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
   }
 
   /**
+   * @hidden
+   *
    * Protected factory to construct a new instance of the current class, with
    * the given path.
    * 
@@ -31,6 +33,8 @@ export abstract class PathBase<TJoinable> implements PathOps<TJoinable> {
   }
 
   /**
+   * @hidden
+   *
    * Protected factory to construct a new instance of the current class,
    * with the given filename.
    *

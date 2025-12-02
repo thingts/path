@@ -20,7 +20,7 @@ type TResolveable = RootPathUrl
  * Analogous to {@link AbsolutePath}, but for URLs; i.e. it may have query
  * paramaters and a fragment, and has methods to work with them.
  *
- * To convert to a full URL with an origin, see {@link FullUrlPath#resolve}
+ * To convert to a full URL with an origin, see {@link FullPathUrl#resolve}
  *
  * {@include ./doc-normalization.md}
  *
@@ -58,7 +58,7 @@ export class RootPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   /**
    * {@inheritDoc <internal>!AbsolutePathOps#relativeTo}
    * @QueryAndFragment
-   * The returned {@link RelativePathUrl } has the same query and fragment as `this`
+   * The returned {@link RelativePathUrl} has the same query and fragment as `this`
    * @example
    * ```ts
    * const p1 = new RootPathUrl('/project')

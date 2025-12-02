@@ -70,19 +70,21 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * signifies a directory (e.g. `http://example.com/foo/bar/`) vs. a file
    * or resource.
    *
-   * And so if a URL path's instances {@link pathname} ends with a slash,
-   * it is considered a *directory*, and its {@link filename } is
+   * And so if a URL path's instances {@link pathname `.pathname`} ends with a slash,
+   * it is considered a *directory*, and its {@link filename `.filename`} is
    * undefined.  If it does not end with a slash, its final segment is
    * considered the filename, same as for plain paths.
    *
    * A pathname consisting of a single dot (`.`) is also considered a
    * directory.
    *
-   * To remove the directory designation (i.e. remove the trailing slash) from a URL path, use {@link unDirectory};
-   * to create a directory designation (i.e. add a trailing slash, use {@link join}`('/')`
+   * To remove the directory designation (i.e. remove the trailing slash) from a URL path, use {@link unDirectory `unDirectory()`};
+   * to create a directory designation (i.e. add a trailing slash, use {@link join `join('/')`}.
    *
-   * @see {@like filename}
-   * @see {@like pathname}
+   * @returns Returns `true` if this URL's {@link pathname `.pathname`} ends with a slash
+   *
+   * @see {@link filename}
+   * @see {@link pathname}
    * @see {@link unDirectory}
    */
   get isDirectory(): boolean                 { return this.#pathname.endsWith('/') || this.#pathname === '/' || this.#pathname === '.'}
@@ -90,9 +92,9 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   /**
    * {@inheritDoc <internal>!PathOps#segments}}
    * @ForDirectoryPaths
-   * If the pathname ends with a slash (i.e. `this.`{@link isDirectory}` === true`)
-   * there is no filename, the last segment in the array will be
-   * the last directory name.
+   * If the pathname ends with a slash (i.e. {@link isDirectory `this.isDirectory === true`})
+   * there is no filename, the last segment in the array will be the last
+   * directory name.
    */
   get segments(): string[]                   { return this.#pathname.split('/').filter(Boolean) }
 
@@ -114,7 +116,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   /**
    * {@inheritDoc <internal>!FilenameOps#stem}
    * @ForDirectoryPaths
-   * If the pathname ends with a slash (i.e. `this.`{@link isDirectory}` === true`)
+   * If the pathname ends with a slash (i.e. {@link isDirectory `this.isDirectory === true`})
    * there is no filename, and so `this.stem` returns `undefined`
    */
   get stem(): string | undefined         { return this.filename?.stem }
@@ -122,7 +124,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   /**
    * {@inheritDoc <internal>!FilenameOps#extension}
    * @ForDirectoryPaths
-   * If the pathname ends with a slash (i.e. `this.`{@link isDirectory}` === true`)
+   * If the pathname ends with a slash (i.e. {@link isDirectory `this.isDirectory === true`})
    * there is no filename, and so `this.extension` returns `undefined`
    */
   get extension(): string | undefined    { return this.filename?.extension }
@@ -131,14 +133,14 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * {@inheritDoc <internal>!PathOps#filename}
    *
    * @ForDirectoryPaths
-   * If the pathname ends with a slash (i.e. `this.`{@link isDirectory}` === true`)
+   * If the pathname ends with a slash (i.e. {@link isDirectory `this.isDirectory === true`})
    * there is no filename, so `this.filename` returns `undefined`.
    */
   get filename(): Filename | undefined   { return this.#filenameStr ? new Filename(this.#filenameStr) : undefined }
 
   /**
    * @returns Returns a new URL instance for parent directory of this URL.  The new
-   * instance always has {@link isDirectory} `true`, and keeps the same
+   * instance always has {@link isDirectory `.isDirectory`} `true`, and keeps the same
    * query and hash as `this`.
    */
   get parent(): this                     { return this.cloneWithPathname(pth.dirname(this.#pathname)) }
@@ -193,7 +195,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * In addition to joining path segments, `.join()` also merges queries
    * and fragments from the given segments into the resulting URL: as the
    * args are processed, any query encountered will be merged into the
-   * current query using the semantics of {@link mergeQuery},  and any
+   * current query using the semantics of {@link mergeQuery `mergeQuery()`},  and any
    * fragment will replace the current fragment.
    *
    * (It's not possible to remove an existing query parameter or the entire
@@ -238,7 +240,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    *
    * The given query parameters can be empty `{}` to create an empty query
    * (i.e. a `?` with no parameters after it); to remove the query
-   * entirely, use {@link removeQuery}.
+   * entirely, use {@link removeQuery `removeQuery()`}.
    *
    * @see {@link UrlBase#query query}
    * @see {@link mergeQuery}
@@ -255,7 +257,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * The merge overwrite the values of the existing query for whichever
    * keys are given in the provided query.    If there is no current query,
    * or if the current query is empty, this has the same effect as {@link
-   * replaceQuery}.
+   * replaceQuery `replaceQuery()`}.
    *
    * @see {@link UrlBase#query query}
    * @see {@link replaceQuery}
@@ -350,6 +352,7 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
   //
   /////////////////////////////////////////////////////////////////////////////
   
+  /** @hidden */
   protected nextParts(overrides: Partial<RemovablePathParts> = {}): UrlPathParts {
     const { pathname, query, fragment } = overrides
     return {
@@ -359,7 +362,9 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
     }
   }
 
-  /*
+  /**
+   * @hidden
+   *
    * Protected factory to construct a new instance of the current class,
    * optionally given any of a new pathname, query, or fragment.  Any not
    * provided will default to the current instance's value.
@@ -373,10 +378,12 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
     return new ctor(this.nextParts(params))
   }
 
+  /** @hidden */
   protected cloneWithPathname(pathname: string): this {
     return this.cloneWithParts({ pathname })
   }
 
+  /** @hidden */
   protected cloneWithFilename(filename: string|Filename): this { return this.parent.join(filename) }
 
 

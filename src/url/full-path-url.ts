@@ -18,16 +18,15 @@ type TResolveable = RootPathUrl | FullPathUrl
 
 /**
  * Fully qualified URL with origin, pathname, query, and fragment, for URLs
- * that have paths, also known as [URIs with hierarchical
- * schemes](https://www.rfc-editor.org/rfc/rfc3986#section-1.2.3)), i.e.
- * whose scheme is one of: `http:`, `https:`, `ftp:`, `ftps:`, `ws:`,
- * 'wss:', `file:`)
+ * that have paths, specifically the ["special
+ * schemes"](https://url.spec.whatwg.org/#special-scheme): `http://`,
+ * `https://`, `ftp://`, `ftps://`, `ws://`, `wss://`, and `file://`.
  *
  * Analogous to {@AbsolutePath} but for Full URLs, i.e. it has an origin
  * (e.g. `https://example.com:8080`) and may have query parameters and a
  * fragment, and has methods to work with them.
  *
- * Has the same capabilities * {@link RootPathUrl}, but requires an origin,
+ * Has the same capabilities as {@link RootPathUrl}, but requires an origin,
  * and provides methods to work with the origin and for conversion to/from
  * the standard `URL` class.
  *
@@ -70,11 +69,9 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
   /**
    * Creates a new FullPathUrl instance from the given URL, string or parts.
    *
-   * @throws Throws an error if given a string that does not properly parse
-   * to a full URL, or if given a scheme that is not
-   * [hierarchical](https://www.rfc-editor.org/rfc/rfc3986#section-1.2.3)),
-   * i.e.  is not one of: `http:`, `https:`, `ftp:`, `ftps:`, `ws:`,
-   * 'wss:', `file:`)
+   * @throws Throws an error if given a string that does not properly parse to
+   * a full URL, or if given a scheme that is not one of: `http:`, `https:`,
+   * `ftp:`, `ftps:`, `ws:`, 'wss:', or `file:`
    * 
    *
    * @example
@@ -177,7 +174,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
    * starting with '/') is encountered, the entire current URL is discarded
    * (origin, pathname, query, fragment) and replaced with that argument.
    *
-   * `resolve()` can be used to convert a {@link RootPathURL} or {@link RelativePathURL} to a {@link FullPathUrl} (see examples).
+   * `resolve()` can be used to convert a {@link RootPathUrl} or {@link RelativePathUrl} to a {@link FullPathUrl} (see examples).
    *
    * @example
    * ```ts

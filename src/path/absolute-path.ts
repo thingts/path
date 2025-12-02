@@ -16,8 +16,9 @@ type TResolveable = AbsolutePath
  * are normalized and immutable.
  *
  * {@link AbsolutePath} has the same functionality as {@link RelativePath} but
- * with additional methods that are only valid for absolute paths: {@link
- * resolve}, {@link relativeTo}, and {@link descendsFrom}.
+ * with additional methods that are only valid for absolute paths:
+ * {@link resolve `resolve()`}, {@link relativeTo `relativeTo()`}, and
+ * {@link descendsFrom `descendsFrom()`}.
  *
  * Note that {@link AbsolutePath} provides pure path manipulation, it does
  * not access the filesystem in any way.  (If you want to work with the

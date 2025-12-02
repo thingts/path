@@ -1,14 +1,16 @@
 import type { Filename } from '../filename'
 import type { PathOps } from './path-ops'
 
-export interface AbsolutePathOps<TRelative extends PathOps, TResolvable = never, TJoinable = never> {
+export interface AbsolutePathOps<TRelative extends PathOps, TResolvable = never, TJoinable = never> extends PathOps<TJoinable> {
   /**
    * Resolve additional paths or components against this absolute path.
    *
-   * Similar to {@link join}, except that if any argument is absolute, the current
+   * Similar to {@link join `join()`}, except that if any argument is absolute, the current
    * path is discarded and resolution starts from that argument.
    *
    * @returns A new instance of this type, representing the resolved path.
+   *
+   * @see {@link join}
    */
   resolve(...args: readonly (string | Filename | null | undefined | TJoinable | TResolvable)[]): this
 

@@ -13,8 +13,8 @@ type Joinable = RelativePathUrl | RelativePath
  * parameters and a fragment, and has methods to work with them.
  *
  * RelativePathUrls can be joined with other RelativePathUrls or onto
- * {@link AbsolutePathUrl}s or {@link FullPathUrl}s to form complete URLs
- * (see {@link join}).
+ * {@link RootPathUrl}s or {@link FullPathUrl}s to form complete URLs
+ * (see {@link join `join()`}).
  *
  * {@include ./doc-normalization.md}
  *
