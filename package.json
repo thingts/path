@@ -1,20 +1,19 @@
 {
   "name": "@thingts/path",
   "version": "1.0.6",
-  "description": "Type-safe, ergonomic package for working with paths in any javascript environment",
+  "description": "Type-safe, ergonomic package for working with paths and filenames, both plain and in URLs, in pure TypeScript (browser-safe, no dependencies)",
   "keywords": [
-    "browser",
-    "extension",
     "filename",
     "filepath",
     "join",
     "no-deps",
-    "normalize",
+    "path utilities",
     "path",
     "posix",
     "resolve",
-    "stem",
-    "typescript"
+    "typescript",
+    "url utilities",
+    "url"
   ],
   "homepage": "https://github.com/thingts/path#readme",
   "bugs": {
