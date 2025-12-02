@@ -24,12 +24,12 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-      - run: npm run docs       # this must output HTML into ./build/docs
+      - run: npx typedoc --gitRevision "$GITHUB_REF_NAME"
 
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./build/docs     # adjust if yours is different
+          path: ./build/docs
 
       - uses: actions/deploy-pages@v4
