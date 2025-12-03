@@ -1,6 +1,6 @@
 {
   "name": "@thingts/path",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Type-safe, ergonomic package for working with paths and filenames, both plain and in URLs, in pure TypeScript (browser-safe, no dependencies)",
   "keywords": [
     "filename",
