@@ -391,18 +391,26 @@ export function urlBasicTests(params: { make: (s: string) => FullPathUrl | RootP
         expect(u.filename?.toString()).toBe('file.txt')
       })
 
-      it('unDirectory removes trailing slash', () => {
-        const u = makeUrl('path/to/directory/')
-        const v = u.unDirectory()
-        expect(v.isDirectory).toBe(false)
-        expect(ignoreAbsolute(v)).toBe('path/to/directory')
-      })
+      describe('unDirectory', () => {
+        it('removes trailing slash', () => {
+          const u = makeUrl('path/to/directory/')
+          const v = u.unDirectory()
+          expect(v.isDirectory).toBe(false)
+          expect(ignoreAbsolute(v)).toBe('path/to/directory')
+        })
 
-      it('unDirectory is idempotent', () => {
-        const u = makeUrl('path/to/file.txt')
-        const v = u.unDirectory()
-        expect(v.isDirectory).toBe(false)
-        expect(v.pathname).toBe(pathify('/path/to/file.txt'))
+        it('is idempotent', () => {
+          const u = makeUrl('path/to/file.txt')
+          const v = u.unDirectory()
+          expect(v.isDirectory).toBe(false)
+          expect(v.pathname).toBe(pathify('/path/to/file.txt'))
+        })
+
+        it('is a no-op on root directory', () => {
+          const u = makeUrl('')
+          const v = u.unDirectory()
+          expect(u.equals(v.toString())).toBe(true)
+        })
       })
 
       it('join with slash creates directory', () => {

@@ -323,6 +323,11 @@ export abstract class UrlBase<TJoinable> implements PathOps<TJoinable> {
    * @returns Returns a new instance with the directory designation
    * removed, i.e.  the final slash (if any) is removed from the pathname.
    *
+   * *Exception:* For FullPathUrl and RootPathUrl, if the pathname is a
+   * single slash (`/`), it is not removed, and the new instance will be
+   * the same as the current instance (i.e. `unDirectory` is a no-op on a
+   * root directory)
+   *
    * @see {@link isDirectory}
    * @see {@link pathname}
    */
