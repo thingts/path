@@ -87,6 +87,13 @@ describe('FullPathUrl', () => {
       const v = u.resolve('https://b.com/c?y=2#z')
       expect(v.href).toBe('https://b.com/c?y=2#z')
     })
+
+    it('resets query and fragment on path-only argument', () => {
+      const u = new FullPathUrl('https://x.com/a/b?x=1#x')
+      const v = u.resolve('/c/d')
+      expect(v.href).toBe('https://x.com/c/d')
+    })
+
   })
 
   it('replaceOrigin replaces the base host', () => {

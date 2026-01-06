@@ -1,11 +1,9 @@
 import type { FilenameOps, PathOps, JoinableBasic } from '../core'
-import type { UrlPathParts, UrlQueryParams } from './url-types'
+import type { RemovablePathParts, UrlPathParts, UrlQueryParams } from './url-types'
 import { Filename } from '../filename'
+import { RemovePart } from './url-types'
 import { fnt, pth, urt } from '../tools'
 
-type Override<T, R> = Omit<T, keyof R> & R
-const RemovePart = Symbol('url-base.RemovePart')
-type RemovablePathParts = Override<UrlPathParts, { fragment: string | typeof RemovePart, query: UrlQueryParams | typeof RemovePart }>
 
 /**
  * Base class for all URL-style path types.

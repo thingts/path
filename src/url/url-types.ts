@@ -6,6 +6,12 @@ export type UrlPathParts = {
   fragment?: string
 }
 
+export const RemovePart = Symbol('url-base.RemovePart')
+
+type Override<T, R> = Omit<T, keyof R> & R
+
+export type RemovablePathParts = Override<UrlPathParts, { fragment: string | typeof RemovePart, query: UrlQueryParams | typeof RemovePart }>
+
 export function isUrlPathParts(obj: unknown): obj is UrlPathParts {
   if (typeof obj !== 'object' || obj === null) {
     return false
@@ -18,9 +24,8 @@ export function isUrlPathParts(obj: unknown): obj is UrlPathParts {
   return true
 }
 
-export type UrlFullParts = UrlPathParts & {
-  origin: string
-}
+export type UrlFullParts = UrlPathParts & { origin: string }
+export type RemovableFullParts = RemovablePathParts & { origin: string }
 
 export function isUrlFullParts(obj: unknown): obj is UrlFullParts {
   if (!isUrlPathParts(obj)) {

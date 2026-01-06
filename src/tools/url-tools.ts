@@ -1,4 +1,5 @@
-import type { UrlFullParts, UrlPathParts, UrlQueryParams } from '../url'
+import type { RemovableFullParts, RemovablePathParts, UrlFullParts, UrlPathParts, UrlQueryParams } from '../url'
+import { RemovePart } from '../url'
 import { pth } from '../tools'
 
 function parseQuery(q: string): UrlQueryParams {
@@ -109,14 +110,15 @@ function joinOrResolve(cur: UrlPathParts | UrlFullParts, segments: readonly (str
 
     if (isResolve && relPathname.startsWith('/')) {
       pathname = relPathname
-      query = { ...relQuery }
+      query = relQuery && { ...relQuery }
       fragment = relFragment
-      continue
+    } else {
+      pathname = `${pathname}/${relPathname}`
+      if (relQuery) { query = { ...query, ...relQuery } }
+      if (relFragment) { fragment = relFragment }
     }
-    pathname = `${pathname}/${relPathname}`
-    if (relQuery) { query = { ...query, ...relQuery } }
-    if (relFragment) { fragment = relFragment }
   }
+
   return { origin, pathname: normalizePathname(pathname), query, fragment }
 
 }
@@ -125,10 +127,12 @@ export function join(cur: UrlPathParts, segments: readonly (string | null | unde
   return joinOrResolve(cur, segments, { mode: 'join' })
 }
 
-export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[]): UrlPathParts
-export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { baseOrigin: string}): UrlPathParts & { origin: string }
-export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts?: { baseOrigin: string }): UrlPathParts {
-  return joinOrResolve(cur, segments, { mode: 'resolve', ...opts })
+export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[]): RemovablePathParts
+export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts: { baseOrigin: string}): RemovableFullParts
+export function resolve(cur: UrlPathParts, segments: readonly (string | null | undefined)[], opts?: { baseOrigin: string }): RemovablePathParts | RemovableFullParts {
+  const parts = joinOrResolve(cur, segments, { mode: 'resolve', ...opts })
+  return {
+    ...parts, query: parts.query ?? RemovePart, fragment: parts.fragment ?? RemovePart }
 }
 
 export function partsToString(params: UrlPathParts | UrlFullParts): string {

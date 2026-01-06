@@ -1,6 +1,6 @@
 import type { AbsolutePathOps, JoinableBasic } from '../core'
 import type { RelativePath } from '../path'
-import type { UrlFullParts } from './url-types'
+import type { RemovableFullParts, UrlFullParts } from './url-types'
 import { RelativePathUrl } from './relative-path-url'
 import { RootPathUrl } from './root-path-url'
 import { UrlBase } from './url-base'
@@ -272,7 +272,7 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
     }
   }
 
-  protected override cloneWithParts(params: Partial<UrlFullParts>): this {
+  protected override cloneWithParts(params: Partial<RemovableFullParts>): this {
     const { origin, ...parts } = params
     const ctor = this.constructor as new(parts: UrlFullParts) => this
     return new ctor({
