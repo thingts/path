@@ -231,12 +231,11 @@ export class FullPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
    * p1.descendsFrom(p1, { includeSelf: true }) // → true
    * ```
    */
-  descendsFrom(ancestor: this | string, opts?: { includeSelf?: boolean }): boolean {
-    const ancestorUrl = ancestor instanceof FullPathUrl ? ancestor : new FullPathUrl(ancestor)
-    if (this.#origin !== ancestorUrl.#origin) {
+  descendsFrom(ancestor: this, opts?: { includeSelf?: boolean }): boolean {
+    if (this.#origin !== ancestor.#origin) {
       return false
     }
-    return pth.descendsFrom(ancestorUrl.pathname, this.pathname, opts)
+    return pth.descendsFrom(ancestor.pathname, this.pathname, opts)
   }
 
   /////////////////////////////////////////////////////////////////////////////

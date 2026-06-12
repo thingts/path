@@ -83,8 +83,7 @@ export class RootPathUrl extends UrlBase<TJoinable> implements AbsolutePathOps<T
    * p1.descendsFrom(p1, { includeSelf: true }) // → true
    * ```
    */
-  descendsFrom(ancestor: this | string, opts?: { includeSelf?: boolean }): boolean {
-    const ancestorUrl = ancestor instanceof RootPathUrl ? ancestor : new RootPathUrl(ancestor)
-    return pth.descendsFrom(ancestorUrl.pathname, this.pathname, opts)
+  descendsFrom(ancestor: this, opts?: { includeSelf?: boolean }): boolean {
+    return pth.descendsFrom(ancestor.pathname, this.pathname, opts)
   }
 }

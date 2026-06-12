@@ -33,7 +33,7 @@ export interface AbsolutePathOps<TRelative extends PathOps, TResolvable = never,
   /**
    * Test whether this path is a descendant of the given ancestor path.
    *
-   * @param ancestor - An absolute path or string to check against.
+   * @param ancestor - An absolute path to check against.
    * @param opts.includeSelf - If true, return true when the paths are identical.
    * @returns True if this path descends from the ancestor, otherwise false.
    *
@@ -46,5 +46,5 @@ export interface AbsolutePathOps<TRelative extends PathOps, TResolvable = never,
    * p1.descendsFrom(p1, { includeSelf: true }) // → true
    * ```
    */
-  descendsFrom(ancestor: this | string, opts?: { includeSelf?: boolean }): boolean
+  descendsFrom(ancestor: this, opts?: { includeSelf?: boolean }): boolean
 }

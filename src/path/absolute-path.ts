@@ -120,8 +120,8 @@ export class AbsolutePath extends PathBase<TJoinable> implements AbsolutePathOps
    * console.log(p1.descendsFrom(p1, { includeSelf: true })) // true
    * ```
    */
-  descendsFrom(ancestor: AbsolutePath | string, opts?: { includeSelf?: boolean }): boolean {
-    return pth.descendsFrom(pth.resolve(String(ancestor)), this.path_, opts)
+  descendsFrom(ancestor: AbsolutePath, opts?: { includeSelf?: boolean }): boolean {
+    return pth.descendsFrom(ancestor.toString(), this.path_, opts)
   }
 
 }

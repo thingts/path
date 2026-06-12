@@ -112,11 +112,12 @@ paths, plus extra methods for working with absolute paths, e.g.:
 
 ```ts
 const p = new AbsolutePath('/foo/bar/baz.txt')
+const r = new AbsolutePath('/foo')
 
-p.resolve('more')           // → AbsolutePath('/foo/bar/baz.txt/more')
-p.resolve('/other/x')       // → AbsolutePath('/other/x')
-p.relativeTo('/foo')        // → RelativePath('bar/baz.txt')
-p.descendsFrom('/foo')      // → true
+p.resolve('more')      // → AbsolutePath('/foo/bar/baz.txt/more')
+p.resolve('/other/x')  // → AbsolutePath('/other/x')
+p.relativeTo(r)        // → RelativePath('bar/baz.txt')
+p.descendsFrom(r)      // → true
 ```
 
 ### Constructing URL paths from strings or components
